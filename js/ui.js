@@ -251,9 +251,9 @@ const UIManager = {
         let badgeHtml = '';
         if (hasMultiple) {
             const restUpcs = oldValues.slice(1).map(u => escapeHtml(u)).join('<br>');
-            badgeHtml = `<span class="has-tooltip" style="display:inline-flex;align-items:center;margin-left:6px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:600;cursor:help;white-space:nowrap;position:relative;">
+            badgeHtml = `<span class="upc-badge-tooltip" style="display:inline-flex;align-items:center;margin-left:6px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:600;cursor:help;white-space:nowrap;position:relative;">
                 +${oldValues.length - 1}
-                <div class="tooltip-content" style="position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:8px;background:#fff;border:1px solid #E5E7EB;border-radius:6px;padding:8px 10px;font-size:11px;text-align:left;white-space:nowrap;z-index:10000;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div style="position:absolute !important;bottom:100% !important;left:50% !important;transform:translateX(-50%) !important;margin-bottom:8px !important;background:#fff !important;border:1px solid #E5E7EB !important;border-radius:6px !important;padding:8px 10px !important;font-size:11px !important;text-align:left !important;white-space:normal !important;z-index:10000 !important;box-shadow:0 4px 12px rgba(0,0,0,0.15) !important;visibility:hidden;opacity:0;transition:opacity 0.2s,visibility 0.2s;">
                     <div style="font-size:10px;font-weight:600;color:#6B7280;margin-bottom:4px;text-transform:uppercase;">Old UPCs</div>
                     ${restUpcs}
                 </div>

@@ -918,6 +918,12 @@ input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-colo
     opacity: 1;
 }
 
+/* UPC Badge tooltip - show on hover */
+.upc-badge-tooltip:hover > div {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 .has-tooltip .tooltip-content::before {
     content: '';
     position: absolute;
