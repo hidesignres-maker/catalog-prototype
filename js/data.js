@@ -125,103 +125,135 @@ const tableData = (function () {
 })();
 
 // ─── UPC Change Matrix mock data ─────────────────────────────────────────────
+// Structure matches ui.js field expectations:
+// rec.brand { from, to|null }, rec.description { from, to|null },
+// rec.upc, rec.tradeUpc, rec.caseGtin, rec.ozWeight,
+// rec.casePack, rec.productCode, rec.priceArea, rec.srp, rec.sdv
+
 const upcChangeData = [
   {
     id: 'UCH-001',
-    mfgId: '028400',
-    tradeUpc: '028400-79781-8',
-    caseGtin: '00028400687560',
-    productCode: '11041901',
-    priceArea: 'NATL',
-    changes: {
-      productDescription: { from: 'Cheetos Crunchy Flamin Hot Limon 8.5oz',          to: "Cheetos Crunchy Flamin' Hot Limon, 8.5oz" },
-      ozWeight:           { from: '8.0',   to: '8.5'      },
-      upc:                { from: '52848', to: '79781-8'   },
-      casePack:           { from: '4',     to: '5'         },
-      srp:                { from: '$5.99', to: '$4.99'     },
-      sdv:                { from: '$3.20', to: '$2.85'     },
-      tradeMargin:        { from: '22%',   to: '24%'       },
-    },
+    vendor: 'FRIT1',
+    bu: 'FLNA',
+    brand:       { from: 'CHEETOS',   to: null },
+    description: { from: 'Cheetos Crunchy Flamin Hot Limon 8.5oz', to: "Cheetos Crunchy Flamin' Hot Limon, 8.5oz" },
+    upc:         { from: '028400000225', to: '028400004001' },
+    tradeUpc:    { from: null,           to: '028400-54042-1' },
+    caseGtin:    { from: '00028400536424', to: null },
+    ozWeight:    { from: '8.0 oz',      to: '8.5 oz' },
+    casePack:    { from: '4ct',         to: '5ct' },
+    productCode: { from: null,          to: '10607401' },
+    priceArea:   { from: null,          to: 'NATL' },
+    srp:         { from: '$5.99',       to: '$4.99' },
+    sdv:         { from: '$3.20',       to: '$2.85' },
   },
   {
     id: 'UCH-002',
-    mfgId: '028400',
-    tradeUpc: '028400-79783-2',
-    caseGtin: '00028400536424',
-    productCode: '10607401',
-    priceArea: 'ECOMMDIRECT',
-    changes: {
-      productDescription: { from: 'Doritos Ultimate Garlic Parm 9.25oz',              to: 'Doritos Tortilla Chips Ultimate Garlic Parm Flavored, 9.25 Oz' },
-      ozWeight:           { from: '9.0',   to: '9.25'     },
-      upc:                { from: '52846', to: '79783-2'   },
-      casePack:           { from: '4',     to: '6'         },
-      srp:                { from: '$5.99', to: '$4.99'     },
-      sdv:                { from: '$3.10', to: '$2.90'     },
-      tradeMargin:        { from: '21%',   to: '23%'       },
-    },
+    vendor: 'FRIT1',
+    bu: 'FLNA',
+    brand:       { from: "LAY'S",      to: null },
+    description: { from: "Lay's Classic Potato Chips 7.75oz", to: null },
+    upc:         { from: '028400000175', to: null },
+    tradeUpc:    { from: null,           to: '028400-54043-8' },
+    caseGtin:    { from: '00028400536440', to: null },
+    ozWeight:    { from: '7.75 oz',     to: null },
+    casePack:    { from: '10ct',        to: null },
+    productCode: { from: null,          to: '10607402' },
+    priceArea:   { from: null,          to: 'NATL' },
+    srp:         { from: '$5.99',       to: '$4.49' },
+    sdv:         { from: '$3.10',       to: '$2.90' },
   },
   {
     id: 'UCH-003',
-    mfgId: '028400',
-    tradeUpc: '028400-54042-1',
-    caseGtin: '00028400540582',
-    productCode: '10647403',
-    priceArea: 'ALASKA',
-    changes: {
-      productDescription: { from: 'Frito-Lay Variety Pack 12ct',                      to: 'Frito-Lay Variety Pack 12 Count' },
-      ozWeight:           { from: '12',    to: '12'        },
-      upc:                { from: '54042', to: '54042'     },
-      casePack:           { from: '12',    to: '12'        },
-      srp:                { from: '$7.49', to: '$6.99'     },
-      sdv:                { from: '$4.80', to: '$4.50'     },
-      tradeMargin:        { from: '19%',   to: '20%'       },
-    },
+    vendor: 'FRIT1',
+    bu: 'FLNA',
+    brand:       { from: 'DORITOS',    to: null },
+    description: { from: 'Doritos Nacho Cheese Flavored Tortilla Chips, 9.25oz', to: null },
+    upc:         { from: '028400000225', to: null },
+    tradeUpc:    { from: null,           to: '028400-54044-5' },
+    caseGtin:    { from: '00028400536424', to: '00028400702768' },
+    ozWeight:    { from: '9.25 oz',     to: null },
+    casePack:    { from: '10ct',        to: '12ct' },
+    productCode: { from: null,          to: '10607403' },
+    priceArea:   { from: null,          to: 'NATL' },
+    srp:         { from: '$5.99',       to: null },
+    sdv:         { from: '$3.10',       to: null },
   },
   {
     id: 'UCH-004',
-    mfgId: '028400',
-    tradeUpc: '028400-79781-8',
-    caseGtin: '00028400687560',
-    productCode: '11041901',
-    priceArea: 'ECOMMRETAIL',
-    changes: {
-      productDescription: { from: 'Cheetos Crunchy Flamin Hot Limon 8.5oz',           to: "Cheetos Crunchy Flamin' Hot Limon, 8.5oz" },
-      ozWeight:           { from: '8.0',   to: '8.5'      },
-      upc:                { from: '52848', to: '79781-8'   },
-      casePack:           { from: '4',     to: '5'         },
-      srp:                { from: '$5.99', to: '$4.99'     },
-      sdv:                { from: '$3.20', to: '$2.85'     },
-      tradeMargin:        { from: '22%',   to: '24%'       },
-    },
+    vendor: 'FRIT1',
+    bu: 'FLNA',
+    brand:       { from: 'FRITOS',     to: 'FRITO-LAY' },
+    description: { from: 'Fritos Original 9.25oz', to: 'Frito-Lay Fritos Original Corn Chips 9.25oz' },
+    upc:         { from: '028400000275', to: null },
+    tradeUpc:    { from: null,           to: '028400-54045-2' },
+    caseGtin:    { from: '00028400536448', to: null },
+    ozWeight:    { from: '9.25 oz',     to: null },
+    casePack:    { from: '10ct',        to: null },
+    productCode: { from: null,          to: '10607404' },
+    priceArea:   { from: null,          to: 'NATL' },
+    srp:         { from: '$5.49',       to: null },
+    sdv:         { from: '$3.00',       to: null },
+  },
+  {
+    id: 'UCH-005',
+    vendor: 'FRIT1',
+    bu: 'FLNA',
+    brand:       { from: 'CHEETOS',    to: null },
+    description: { from: 'Cheetos Puffs Jumbo Bag 9oz', to: null },
+    upc:         { from: '028400000075', to: null },
+    tradeUpc:    { from: null,           to: '028400-54046-9' },
+    caseGtin:    { from: '00028400536456', to: null },
+    ozWeight:    { from: '9.0 oz',      to: null },
+    casePack:    { from: '8ct',         to: null },
+    productCode: { from: '10607401',    to: '11365001' },
+    priceArea:   { from: null,          to: 'CLUB' },
+    srp:         { from: '$6.99',       to: null },
+    sdv:         { from: '$3.80',       to: null },
+  },
+  {
+    id: 'UCH-006',
+    vendor: 'PBC01',
+    bu: 'PBNA',
+    brand:       { from: 'PEPSI',      to: null },
+    description: { from: 'Pepsi Cola 12pk 12oz Cans', to: null },
+    upc:         { from: '012000001481', to: null },
+    tradeUpc:    { from: null,           to: '012000-54047-6' },
+    caseGtin:    { from: '00120000140018', to: null },
+    ozWeight:    { from: '12 fl oz',    to: null },
+    casePack:    { from: '12ct',        to: null },
+    productCode: { from: null,          to: '20891001' },
+    priceArea:   { from: 'NATL',        to: 'ECOMMR' },
+    srp:         { from: '$8.99',       to: '$7.99' },
+    sdv:         { from: '$5.20',       to: '$4.80' },
   },
 ];
 
-// ─── Risk calculation helper ──────────────────────────────────────────────────
-function calcUpcChangeRisk(row) {
-  const c = row.changes;
-  const identityChanged =
-    c.upc?.from !== c.upc?.to ||
-    c.ozWeight?.from !== c.ozWeight?.to ||
-    c.casePack?.from !== c.casePack?.to;
-  if (identityChanged) return 'High';
-  const pricingChanged =
-    c.srp?.from !== c.srp?.to ||
-    c.sdv?.from !== c.sdv?.to ||
-    c.tradeMargin?.from !== c.tradeMargin?.to;
-  if (pricingChanged) return 'Medium';
-  return 'Low';
+// Risk uses direct fields on rec
+function calcUpcChangeRisk(rec) {
+  const changed = (f) => f && f.from !== null && f.to !== null && f.from !== f.to;
+  const identityChanged = changed(rec.upc) || changed(rec.ozWeight) || changed(rec.casePack) || changed(rec.caseGtin) || changed(rec.productCode);
+  if (identityChanged) return 'high';
+  const pricingChanged = changed(rec.srp) || changed(rec.sdv);
+  if (pricingChanged) return 'medium';
+  return 'low';
 }
 
-function calcUpcChangeStatus(row) {
-  return calcUpcChangeRisk(row) === 'High' ? 'Needs Review' : 'Ready';
+function calcUpcChangeStatus(rec) {
+  const r = calcUpcChangeRisk(rec);
+  if (r === 'high') return 'Needs Review';
+  if (r === 'medium') return 'Review Suggested';
+  return 'Ready';
 }
 
-function getChangedFields(row) {
-  const LABELS = {
-    productDescription: 'Title', upc: 'UPC', ozWeight: 'Oz',
-    casePack: 'Case Pack', srp: 'SRP', sdv: 'SDV', tradeMargin: 'Margin',
-  };
-  return Object.entries(row.changes)
-    .filter(([, v]) => v.from !== v.to)
-    .map(([k]) => LABELS[k] || k);
+function getChangedFields(rec) {
+  const map = [
+    ['brand', 'Brand'], ['description', 'Description'], ['upc', 'UPC'],
+    ['tradeUpc', 'Trade UPC'], ['caseGtin', 'Case GTIN'], ['ozWeight', 'Oz'],
+    ['casePack', 'Case Pack'], ['productCode', 'Prod Code'], ['priceArea', 'Price Area'],
+    ['srp', 'SRP'], ['sdv', 'SDV'],
+  ];
+  return map
+    .filter(([k]) => rec[k] && rec[k].to !== null && rec[k].from !== rec[k].to)
+    .map(([, label]) => label);
 }
