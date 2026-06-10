@@ -219,14 +219,6 @@ const EventHandler = {
                 return;
             }
 
-            const upcReviewBtn = e.target.closest('.upc-review-btn');
-            if (upcReviewBtn) {
-                const id = upcReviewBtn.dataset.upcId;
-                const row = upcChangeData.find(r => r.id === id);
-                if (row) this.openUpcChangeDrawer(row);
-                return;
-            }
-
             const statusCell = e.target.closest('.status-cell');
             if (statusCell) {
                 const sku = statusCell.dataset.sku;
@@ -408,110 +400,6 @@ const EventHandler = {
             `;
             if (window.lucide) window.lucide.createIcons();
         }
-        drawerOverlay?.classList.add('active');
-        setTimeout(() => drawer?.classList.add('open'), 10);
-    },
-
-    openUpcChangeDrawer(row) {
-        const drawerOverlay = document.getElementById('drawerOverlay');
-        let drawer = document.getElementById('upcChangeDrawer');
-        if (!drawer) {
-            drawer = document.createElement('div');
-            drawer.id = 'upcChangeDrawer';
-            drawer.className = 'side-drawer';
-            drawer.style.cssText = 'width: 540px;';
-            document.body.appendChild(drawer);
-        }
-
-        const close = () => {
-            drawer.classList.remove('open');
-            setTimeout(() => drawerOverlay?.classList.remove('active'), 300);
-        };
-
-        const risk = calcUpcChangeRisk(row);
-        const status = calcUpcChangeStatus(row);
-        const changedFields = getChangedFields(row);
-        const riskReasons = {
-            High:   'UPC, Oz Weight, Case Pack, SRP, SDV, and Trade Margin changed.',
-            Medium: 'Pricing fields changed. Product identity fields are unchanged.',
-            Low:    'Only product description changed.',
-        };
-
-        const riskColors = { High: ['#FEE2E2','#991B1B'], Medium: ['#FEF9C3','#854D0E'], Low: ['#D1FAE5','#065F46'] };
-        const [rbg, rtx] = riskColors[risk];
-
-        const chip = label =>
-            `<span style="display:inline-flex;align-items:center;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;">${escapeHtml(label)}</span>`;
-
-        const FIELD_LABELS = {
-            productDescription: 'Product Description',
-            upc: 'UPC', ozWeight: 'Oz Weight', casePack: 'Case Pack',
-            srp: 'SRP', sdv: 'SDV', tradeMargin: 'Trade Margin',
-        };
-
-        const compRows = Object.entries(row.changes)
-            .filter(([, v]) => v.from !== v.to)
-            .map(([k, v]) => `
-                <tr style="border-bottom:1px solid #F3F4F6;">
-                    <td style="padding:10px 12px;font-size:12px;font-weight:600;color:#374151;white-space:nowrap;">${FIELD_LABELS[k] || k}</td>
-                    <td style="padding:10px 12px;font-size:12px;color:#6B7280;">${escapeHtml(v.from)}</td>
-                    <td style="padding:10px 12px;font-size:12px;font-weight:600;color:#1D4ED8;">${escapeHtml(v.to)} <span style="color:#1D4ED8;">↑</span></td>
-                </tr>`).join('');
-
-        drawer.innerHTML = `
-            <div class="drawer-header" style="background:#1B4DB8;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
-                <div style="flex:1;">
-                    <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:500;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px;">Change Details</div>
-                    <h2 style="font-size:14px;font-weight:700;color:#fff;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(row.changes.productDescription?.to || row.tradeUpc)}</h2>
-                </div>
-                <button onclick="document.getElementById('upcChangeDrawer').classList.remove('open');setTimeout(()=>document.getElementById('drawerOverlay').classList.remove('active'),300);"
-                    style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
-            </div>
-
-            <div style="flex:1;overflow-y:auto;background:#fff;">
-                <!-- Meta strip -->
-                <div style="padding:14px 20px;background:#F8FAFF;border-bottom:1px solid #E5E7EB;display:flex;gap:20px;flex-wrap:wrap;">
-                    ${[['Mfg ID', row.mfgId],['Trade UPC', row.tradeUpc],['Case GTIN', row.caseGtin],['Product Code', row.productCode],['Price Area', row.priceArea]].map(([l,v]) =>
-                        `<div><div style="font-size:10px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">${l}</div>
-                         <div style="font-size:12px;font-weight:600;color:#111827;">${escapeHtml(v)}</div></div>`).join('')}
-                </div>
-
-                <!-- Risk -->
-                <div style="padding:14px 20px;border-bottom:1px solid #E5E7EB;">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                        <span style="background:${rbg};color:${rtx};font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px;">${risk} Risk</span>
-                        <span style="font-size:12px;color:#6B7280;">${riskReasons[risk]}</span>
-                    </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:4px;">${changedFields.map(chip).join('')}</div>
-                </div>
-
-                <!-- From / To table -->
-                <div style="padding:14px 20px;">
-                    <div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Changed Fields</div>
-                    <div style="border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
-                        <table style="width:100%;border-collapse:collapse;">
-                            <thead>
-                                <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
-                                    <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;">Field</th>
-                                    <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;">From</th>
-                                    <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;">To</th>
-                                </tr>
-                            </thead>
-                            <tbody>${compRows}</tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="drawer-footer" style="padding:14px 20px;border-top:1px solid #E5E7EB;display:flex;gap:8px;justify-content:flex-end;background:#F9FAFB;flex-shrink:0;">
-                <button onclick="this.closest('#upcChangeDrawer').classList.remove('open');"
-                    style="padding:8px 16px;border:1px solid #DC2626;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#DC2626;cursor:pointer;">Reject</button>
-                <button onclick="this.closest('#upcChangeDrawer').classList.remove('open');"
-                    style="padding:8px 16px;border:1px solid #D1D5DB;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">Needs Clarification</button>
-                <button onclick="this.closest('#upcChangeDrawer').classList.remove('open');"
-                    style="padding:8px 16px;border:none;border-radius:6px;background:#16A34A;font-size:13px;font-weight:600;color:#fff;cursor:pointer;">Approve</button>
-            </div>`;
-
         drawerOverlay?.classList.add('active');
         setTimeout(() => drawer?.classList.add('open'), 10);
     },
@@ -854,6 +742,145 @@ const EventHandler = {
         }
 
         UIManager.updateUI();
+    },
+
+    openUpcChangeDrawer(record) {
+        const drawerOverlay = document.getElementById('drawerOverlay');
+
+        let drawer = document.getElementById('upcReviewDrawer');
+        if (!drawer) {
+            drawer = document.createElement('div');
+            drawer.id = 'upcReviewDrawer';
+            drawer.className = 'side-drawer';
+            drawer.style.width = '560px';
+            document.body.appendChild(drawer);
+        }
+
+        const closeDrawer = () => {
+            drawer.classList.remove('open');
+            setTimeout(() => drawerOverlay?.classList.remove('active'), 300);
+        };
+
+        // ── helpers ──────────────────────────────────────────────────────────
+        const ftRow = (label, field) => {
+            if (!field) return '';
+            const hasChange = field.to !== null;
+            return `<div style="margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">${label}</div>
+                ${hasChange
+                    ? `<div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(field.to)}</div>
+                       <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(field.from)}</div>`
+                    : `<div style="font-size:13px;color:#374151;">${escapeHtml(field.from || '—')}</div>`
+                }
+            </div>`;
+        };
+
+        const staticRow = (label, value) => !value ? '' : `<div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">${label}</div>
+            <div style="font-size:13px;color:#374151;">${escapeHtml(value)}</div>
+        </div>`;
+
+        const sectionTitle = (title) =>
+            `<div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;">${title}</div>`;
+
+        // ── header text ──────────────────────────────────────────────────────
+        const descRaw    = record.description ? record.description.from : '—';
+        const descDisplay = descRaw.length > 48 ? descRaw.substring(0, 48) + '…' : descRaw;
+        const brandDisplay = record.brand ? record.brand.from : '—';
+
+        drawer.innerHTML = `
+            <div style="background:#fff;border-bottom:1px solid #E5E7EB;padding:20px 20px 16px;flex-shrink:0;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                    <div>
+                        <div style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Change Details</div>
+                        <div style="font-size:15px;font-weight:700;color:#111827;line-height:1.3;margin-bottom:6px;">${escapeHtml(descDisplay)}</div>
+                        <div style="font-size:12px;color:#6B7280;">${escapeHtml(brandDisplay)} · ${escapeHtml(record.vendor)} · ${escapeHtml(record.customer)}</div>
+                    </div>
+                    <button id="closeUpcReviewBtn" style="background:none;border:none;cursor:pointer;color:#6B7280;padding:2px;flex-shrink:0;display:flex;align-items:center;">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 13.5L13.5 4.5M4.5 4.5L13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div style="flex:1;overflow-y:auto;padding:20px;background:#fff;">
+
+                <!-- Product -->
+                <div style="margin-bottom:24px;">
+                    ${sectionTitle('Product')}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
+                        ${staticRow('Vendor', record.vendor)}
+                        ${staticRow('Customer', record.customer)}
+                    </div>
+                </div>
+
+                <!-- Brand -->
+                <div style="margin-bottom:24px;">
+                    ${sectionTitle('Brand')}
+                    ${ftRow('Brand', record.brand)}
+                </div>
+
+                <!-- Description -->
+                <div style="margin-bottom:24px;">
+                    ${sectionTitle('Description')}
+                    ${ftRow('Description', record.description)}
+                </div>
+
+                <!-- Identifiers -->
+                <div style="margin-bottom:24px;">
+                    ${sectionTitle('Identifiers')}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
+                        ${ftRow('UPC', record.upc)}
+                        ${ftRow('Trade UPC', record.tradeUpc)}
+                        ${ftRow('Case GTIN', record.caseGtin)}
+                        ${ftRow('Product Code', record.productCode)}
+                        ${ftRow('Price Area', record.priceArea)}
+                    </div>
+                </div>
+
+                <!-- Packaging -->
+                <div style="margin-bottom:24px;">
+                    ${sectionTitle('Packaging')}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
+                        ${ftRow('Oz Weight', record.ozWeight)}
+                        ${ftRow('Case Pack', record.casePack)}
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div style="margin-bottom:24px;">
+                    ${sectionTitle('Pricing')}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
+                        ${ftRow('SRP', record.srp)}
+                        ${ftRow('SDV', record.sdv)}
+                        ${ftRow('Trade Margin', record.tradeMargin)}
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding:14px 20px;border-top:1px solid #E5E7EB;display:flex;gap:8px;background:#fff;flex-shrink:0;">
+                <button id="upcDismissBtn" style="flex:1;padding:9px;border:1px solid #D1D5DB;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;">Dismiss</button>
+                <button id="upcClarifyBtn" style="flex:1;padding:9px;border:1px solid #D1D5DB;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;">Needs Clarification</button>
+                <button id="upcApproveBtn" style="flex:1;padding:9px;border:none;border-radius:6px;background:#10B981;font-size:13px;font-weight:600;color:#fff;cursor:pointer;">Approve</button>
+            </div>`;
+
+        drawer.querySelector('#closeUpcReviewBtn').addEventListener('click', closeDrawer);
+
+        [
+            {id:'upcDismissBtn', label:'Dismissed'},
+            {id:'upcClarifyBtn', label:'Needs Clarification'},
+            {id:'upcApproveBtn', label:'Approved'},
+        ].forEach(({id, label}) => {
+            drawer.querySelector(`#${id}`)?.addEventListener('click', () => {
+                record._reviewStatus = label;
+                closeDrawer();
+                const descSnippet = record.description ? record.description.from.substring(0, 30) : record.id;
+                BulkEditManager.showToast(`Change ${label.toLowerCase()} for ${descSnippet}…`);
+                UIManager.renderUpcChangeMatrix();
+            });
+        });
+
+        drawerOverlay?.classList.add('active');
+        setTimeout(() => drawer?.classList.add('open'), 10);
     },
 
     initBulkActions() {

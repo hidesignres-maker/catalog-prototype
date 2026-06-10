@@ -242,41 +242,11 @@ const UIManager = {
             return `<span style="font-size:12px;color:#374151;">${escapeHtml(field.from || '—')}</span>`;
         }
         return `<div>
-            <div style="font-size:11px;color:#9CA3AF;line-height:1.5;">→ ${escapeHtml(field.from)}</div>
-            <div style="font-size:12px;font-weight:600;color:#2563EB;line-height:1.5;">${escapeHtml(field.to)}</div>
+            <div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(field.to)}</div>
+            <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(field.from)}</div>
         </div>`;
     },
 
-    _riskBadge(risk) {
-        const cfg = {
-            high:   {bg:'#FEF2F2', color:'#EF4444', border:'#FECACA'},
-            medium: {bg:'#FFFBEB', color:'#D97706', border:'#FDE68A'},
-            low:    {bg:'#F0FDF4', color:'#059669', border:'#A7F3D0'},
-        };
-        const c = cfg[risk] || cfg.low;
-        return `<span style="background:${c.bg};color:${c.color};border:1px solid ${c.border};padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;">${escapeHtml(risk)}</span>`;
-    },
-
-    _changedChips(rec) {
-        const meta = [
-            {key:'brand',       label:'Brand'},
-            {key:'description', label:'Description'},
-            {key:'upc',         label:'UPC'},
-            {key:'tradeUpc',    label:'Trade UPC'},
-            {key:'caseGtin',    label:'Case GTIN'},
-            {key:'ozWeight',    label:'Oz Weight'},
-            {key:'casePack',    label:'Case Pack'},
-            {key:'productCode', label:'Prod Code'},
-            {key:'priceArea',   label:'Price Area'},
-            {key:'srp',         label:'SRP'},
-            {key:'sdv',         label:'SDV'},
-            {key:'tradeMargin', label:'Margin'},
-        ];
-        return meta
-            .filter(f => rec[f.key] && rec[f.key].to !== null)
-            .map(f => `<span style="display:inline-flex;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:600;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;white-space:nowrap;">${f.label}</span>`)
-            .join('');
-    },
 
     renderUpcChangeMatrix() {
         const tableContainer = document.querySelector('.table-container');
@@ -306,44 +276,34 @@ const UIManager = {
             return;
         }
 
-        const statusBadge = (risk) => {
-            const cfg = {
-                high:   {label:'Needs Review',    bg:'#FEF2F2', color:'#B91C1C', border:'#FECACA'},
-                medium: {label:'Review Suggested', bg:'#FFFBEB', color:'#B45309', border:'#FDE68A'},
-                low:    {label:'Ready',            bg:'#F0FDF4', color:'#15803D', border:'#A7F3D0'},
-            };
-            const c = cfg[risk] || cfg.low;
-            return `<span style="background:${c.bg};color:${c.color};border:1px solid ${c.border};padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;">${c.label}</span>`;
+        const getSimpleStatus = (reviewStatus) => {
+            if (reviewStatus === 'Approved') return {label:'Ready', bg:'#F0FDF4', color:'#15803D', border:'#A7F3D0'};
+            if (reviewStatus === 'Needs Clarification') return {label:'Needs Review', bg:'#FEF2F2', color:'#B91C1C', border:'#FECACA'};
+            return {label:'UPC Changes', bg:'#EFF6FF', color:'#2563EB', border:'#BFDBFE'};
         };
 
         const rowsHtml = data.map(rec => {
-            const risk     = calcUpcChangeRisk(rec);
             const reviewed = rec._reviewStatus;
-
-            const brandFrom    = rec.brand ? rec.brand.from : '';
-            const brandChanged = rec.brand && rec.brand.to !== null;
-            const brandHtml    = brandChanged
-                ? `<div style="font-size:10px;color:#9CA3AF;text-decoration:line-through;line-height:1.4;">${escapeHtml(rec.brand.from)}</div>
-                   <div style="font-size:12px;font-weight:700;color:#2563EB;line-height:1.4;">${escapeHtml(rec.brand.to)}</div>`
-                : `<div style="font-size:12px;font-weight:700;color:#374151;">${escapeHtml(brandFrom)}</div>`;
+            const statusCfg = getSimpleStatus(reviewed);
 
             const descFrom = rec.description ? rec.description.from : '—';
             const descTo   = rec.description && rec.description.to !== null ? rec.description.to : null;
 
+            const btnLabel = reviewed || 'Review';
             const btnStyle = reviewed
                 ? 'padding:4px 12px;border:1px solid #D1D5DB;border-radius:6px;background:#F9FAFB;font-size:12px;font-weight:600;color:#6B7280;cursor:default;white-space:nowrap;'
                 : 'padding:4px 12px;border:1px solid #BFDBFE;border-radius:6px;background:#EFF6FF;font-size:12px;font-weight:600;color:#2563EB;cursor:pointer;white-space:nowrap;';
 
             return `<tr style="border-bottom:1px solid #F3F4F6;vertical-align:top;">
-                <td style="padding:10px 12px;white-space:nowrap;">${statusBadge(risk)}</td>
-                <td style="padding:10px 12px;min-width:140px;">
-                    ${brandHtml}
-                    <div style="font-size:11px;color:#6B7280;margin-top:2px;">${escapeHtml(rec.vendor)} · ${escapeHtml(rec.bu)}</div>
+                <td style="padding:10px 12px;white-space:nowrap;">
+                    <span style="background:${statusCfg.bg};color:${statusCfg.color};border:1px solid ${statusCfg.border};padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;">${statusCfg.label}</span>
                 </td>
-                <td style="padding:10px 12px;min-width:200px;">
+                <td style="padding:10px 12px;font-size:12px;color:#6B7280;">${escapeHtml(rec.vendor)} · ${escapeHtml(rec.bu)}</td>
+                <td style="padding:10px 12px;min-width:120px;">${this._ftCell(rec.brand)}</td>
+                <td style="padding:10px 12px;min-width:180px;">
                     ${descTo
-                        ? `<div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">→ ${escapeHtml(descFrom)}</div>
-                           <div style="font-size:12px;color:#374151;font-weight:500;">${escapeHtml(descTo)}</div>`
+                        ? `<div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(descTo)}</div>
+                           <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(descFrom)}</div>`
                         : `<div style="font-size:12px;color:#374151;">${escapeHtml(descFrom)}</div>`
                     }
                 </td>
@@ -357,19 +317,20 @@ const UIManager = {
                 <td style="padding:10px 12px;">${this._ftCell(rec.srp)}</td>
                 <td style="padding:10px 12px;">${this._ftCell(rec.sdv)}</td>
                 <td style="padding:10px 12px;">
-                    <button class="upc-review-btn" data-id="${escapeHtml(rec.id)}" style="${btnStyle}">${escapeHtml(reviewed || 'Review')}</button>
+                    <button class="upc-review-btn" data-id="${escapeHtml(rec.id)}" style="${btnStyle}">${escapeHtml(btnLabel)}</button>
                 </td>
             </tr>`;
         }).join('');
 
         section.innerHTML = `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;">
             <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;min-width:1600px;">
+                <table style="width:100%;border-collapse:collapse;min-width:1800px;">
                     <thead>
                         <tr style="background:#F9FAFB;border-bottom:2px solid #E5E7EB;">
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Status</th>
-                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;min-width:140px;">Product / Brand</th>
-                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;min-width:200px;">Description Change</th>
+                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Product</th>
+                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;min-width:120px;">Brand</th>
+                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;min-width:180px;">Description Change</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">UPC</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Trade UPC</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Case GTIN</th>
