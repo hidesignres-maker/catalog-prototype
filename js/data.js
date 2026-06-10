@@ -124,136 +124,290 @@ const tableData = (function () {
   return records;
 })();
 
-// ─── UPC Change Matrix mock data ─────────────────────────────────────────────
-// Structure matches ui.js field expectations:
-// rec.brand { from, to|null }, rec.description { from, to|null },
-// rec.upc, rec.tradeUpc, rec.caseGtin, rec.ozWeight,
-// rec.casePack, rec.productCode, rec.priceArea, rec.srp, rec.sdv
+// ─── UPC Change Matrix helpers & data ────────────────────────────────────────
 
-const upcChangeData = [
-  {
-    id: 'UCH-001',
-    vendor: 'FRIT1',
-    bu: 'FLNA',
-    brand:       { from: 'CHEETOS',   to: null },
-    description: { from: 'Cheetos Crunchy Flamin Hot Limon 8.5oz', to: "Cheetos Crunchy Flamin' Hot Limon, 8.5oz" },
-    upc:         { from: '028400000225', to: '028400004001' },
-    tradeUpc:    { from: null,           to: '028400-54042-1' },
-    caseGtin:    { from: '00028400536424', to: null },
-    ozWeight:    { from: '8.0 oz',      to: '8.5 oz' },
-    casePack:    { from: '4ct',         to: '5ct' },
-    productCode: { from: null,          to: '10607401' },
-    priceArea:   { from: null,          to: 'NATL' },
-    srp:         { from: '$5.99',       to: '$4.99' },
-    sdv:         { from: '$3.20',       to: '$2.85' },
-  },
-  {
-    id: 'UCH-002',
-    vendor: 'FRIT1',
-    bu: 'FLNA',
-    brand:       { from: "LAY'S",      to: null },
-    description: { from: "Lay's Classic Potato Chips 7.75oz", to: null },
-    upc:         { from: '028400000175', to: null },
-    tradeUpc:    { from: null,           to: '028400-54043-8' },
-    caseGtin:    { from: '00028400536440', to: null },
-    ozWeight:    { from: '7.75 oz',     to: null },
-    casePack:    { from: '10ct',        to: null },
-    productCode: { from: null,          to: '10607402' },
-    priceArea:   { from: null,          to: 'NATL' },
-    srp:         { from: '$5.99',       to: '$4.49' },
-    sdv:         { from: '$3.10',       to: '$2.90' },
-  },
-  {
-    id: 'UCH-003',
-    vendor: 'FRIT1',
-    bu: 'FLNA',
-    brand:       { from: 'DORITOS',    to: null },
-    description: { from: 'Doritos Nacho Cheese Flavored Tortilla Chips, 9.25oz', to: null },
-    upc:         { from: '028400000225', to: null },
-    tradeUpc:    { from: null,           to: '028400-54044-5' },
-    caseGtin:    { from: '00028400536424', to: '00028400702768' },
-    ozWeight:    { from: '9.25 oz',     to: null },
-    casePack:    { from: '10ct',        to: '12ct' },
-    productCode: { from: null,          to: '10607403' },
-    priceArea:   { from: null,          to: 'NATL' },
-    srp:         { from: '$5.99',       to: null },
-    sdv:         { from: '$3.10',       to: null },
-  },
-  {
-    id: 'UCH-004',
-    vendor: 'FRIT1',
-    bu: 'FLNA',
-    brand:       { from: 'FRITOS',     to: 'FRITO-LAY' },
-    description: { from: 'Fritos Original 9.25oz', to: 'Frito-Lay Fritos Original Corn Chips 9.25oz' },
-    upc:         { from: '028400000275', to: null },
-    tradeUpc:    { from: null,           to: '028400-54045-2' },
-    caseGtin:    { from: '00028400536448', to: null },
-    ozWeight:    { from: '9.25 oz',     to: null },
-    casePack:    { from: '10ct',        to: null },
-    productCode: { from: null,          to: '10607404' },
-    priceArea:   { from: null,          to: 'NATL' },
-    srp:         { from: '$5.49',       to: null },
-    sdv:         { from: '$3.00',       to: null },
-  },
-  {
-    id: 'UCH-005',
-    vendor: 'FRIT1',
-    bu: 'FLNA',
-    brand:       { from: 'CHEETOS',    to: null },
-    description: { from: 'Cheetos Puffs Jumbo Bag 9oz', to: null },
-    upc:         { from: '028400000075', to: null },
-    tradeUpc:    { from: null,           to: '028400-54046-9' },
-    caseGtin:    { from: '00028400536456', to: null },
-    ozWeight:    { from: '9.0 oz',      to: null },
-    casePack:    { from: '8ct',         to: null },
-    productCode: { from: '10607401',    to: '11365001' },
-    priceArea:   { from: null,          to: 'CLUB' },
-    srp:         { from: '$6.99',       to: null },
-    sdv:         { from: '$3.80',       to: null },
-  },
-  {
-    id: 'UCH-006',
-    vendor: 'PBC01',
-    bu: 'PBNA',
-    brand:       { from: 'PEPSI',      to: null },
-    description: { from: 'Pepsi Cola 12pk 12oz Cans', to: null },
-    upc:         { from: '012000001481', to: null },
-    tradeUpc:    { from: null,           to: '012000-54047-6' },
-    caseGtin:    { from: '00120000140018', to: null },
-    ozWeight:    { from: '12 fl oz',    to: null },
-    casePack:    { from: '12ct',        to: null },
-    productCode: { from: null,          to: '20891001' },
-    priceArea:   { from: 'NATL',        to: 'ECOMMR' },
-    srp:         { from: '$8.99',       to: '$7.99' },
-    sdv:         { from: '$5.20',       to: '$4.80' },
-  },
-];
-
-// Risk uses direct fields on rec
-function calcUpcChangeRisk(rec) {
-  const changed = (f) => f && f.from !== null && f.to !== null && f.from !== f.to;
-  const identityChanged = changed(rec.upc) || changed(rec.ozWeight) || changed(rec.casePack) || changed(rec.caseGtin) || changed(rec.productCode);
-  if (identityChanged) return 'high';
-  const pricingChanged = changed(rec.srp) || changed(rec.sdv);
-  if (pricingChanged) return 'medium';
-  return 'low';
-}
-
-function calcUpcChangeStatus(rec) {
-  const r = calcUpcChangeRisk(rec);
-  if (r === 'high') return 'Needs Review';
-  if (r === 'medium') return 'Review Suggested';
-  return 'Ready';
-}
+const _UPC_HIGH_FIELDS  = ['upc','tradeUpc','caseGtin','productCode','ozWeight','casePack','priceArea'];
+const _UPC_MED_FIELDS   = ['srp','sdv','tradeMargin'];
+const _UPC_FIELD_LABELS = {
+    brand:'Brand', description:'Description', upc:'UPC', tradeUpc:'Trade UPC',
+    caseGtin:'Case GTIN', ozWeight:'Oz Weight', casePack:'Case Pack',
+    productCode:'Product Code', priceArea:'Price Area',
+    srp:'SRP', sdv:'SDV', tradeMargin:'Trade Margin',
+};
 
 function getChangedFields(rec) {
-  const map = [
-    ['brand', 'Brand'], ['description', 'Description'], ['upc', 'UPC'],
-    ['tradeUpc', 'Trade UPC'], ['caseGtin', 'Case GTIN'], ['ozWeight', 'Oz'],
-    ['casePack', 'Case Pack'], ['productCode', 'Prod Code'], ['priceArea', 'Price Area'],
-    ['srp', 'SRP'], ['sdv', 'SDV'],
-  ];
-  return map
-    .filter(([k]) => rec[k] && rec[k].to !== null && rec[k].from !== rec[k].to)
-    .map(([, label]) => label);
+    return Object.keys(_UPC_FIELD_LABELS).filter(k => rec[k] && rec[k].to !== null);
 }
+
+function calcUpcChangeRisk(rec) {
+    const brandChanged = rec.brand && rec.brand.to !== null;
+    const highChanged  = brandChanged || _UPC_HIGH_FIELDS.some(f => rec[f] && rec[f].to !== null);
+    if (highChanged) return 'high';
+    const medChanged   = _UPC_MED_FIELDS.some(f => rec[f] && rec[f].to !== null);
+    if (medChanged) return 'medium';
+    return 'low';
+}
+
+function calcUpcChangeStatus(risk) {
+    if (risk === 'high')   return 'Needs Review';
+    if (risk === 'medium') return 'Review Suggested';
+    return 'Ready';
+}
+
+const upcChangeData = [
+    // 1 ─ UPC + Description + Oz Weight  ▸ HIGH
+    {
+        id:'UPC-001', bu:'FLNA', vendor:'FRIT1', customer:'Amazon.com', mfgId:'052000',
+        brand:       {from:'CHEETOS',                                    to:null},
+        description: {from:'Cheetos Flamin Hot Crunch 8.0oz',            to:"Cheetos Crunchy Flamin' Hot Limon, 8.5oz"},
+        upc:         {fromList:['028400000225', '028400000226', '028400000227'], to:'028400004001'},
+        tradeUpc:    {from:'028400-54042-1',                             to:null},
+        caseGtin:    {from:'000284000536424',                            to:null},
+        ozWeight:    {from:'8.0 oz',                                     to:'8.5 oz'},
+        casePack:    {from:'10ct',                                       to:null},
+        productCode: {from:'10607401',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$5.49',                                      to:'$5.99'},
+        sdv:         {from:'$52.40',                                     to:'$56.20'},
+        tradeMargin: {from:'18.2%',                                      to:null},
+        changeDate:'06/15/26', reason:'Weight reformulation and flavor name update',
+    },
+    // 2 ─ Pricing-only  ▸ MEDIUM
+    {
+        id:'UPC-002', bu:'FLNA', vendor:'FRIT1', customer:'Kroger', mfgId:'052000',
+        brand:       {from:"LAY'S",                                      to:null},
+        description: {from:"Lay's Classic Potato Chips 7.75oz",          to:null},
+        upc:         {from:'028400000175',                               to:null},
+        tradeUpc:    {from:'028400-54043-8',                             to:null},
+        caseGtin:    {from:'000284000536440',                            to:null},
+        ozWeight:    {from:'7.75 oz',                                    to:null},
+        casePack:    {from:'10ct',                                       to:null},
+        productCode: {from:'10607402',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$5.49',                                      to:'$5.99'},
+        sdv:         {from:'$52.40',                                     to:'$56.20'},
+        tradeMargin: {from:'17.5%',                                      to:'18.0%'},
+        changeDate:'06/12/26', reason:'Q3 pricing adjustment',
+    },
+    // 3 ─ Case Pack + Case GTIN  ▸ HIGH
+    {
+        id:'UPC-003', bu:'FLNA', vendor:'FRIT1', customer:'Walmart', mfgId:'052000',
+        brand:       {from:'DORITOS',                                    to:null},
+        description: {from:'Doritos Nacho Cheese Flavored Tortilla Chips, 9.25oz', to:null},
+        upc:         {from:'028400000225',                               to:null},
+        tradeUpc:    {from:'028400-54044-5',                             to:null},
+        caseGtin:    {from:'000284000536424',                            to:'000284000702768'},
+        ozWeight:    {from:'9.25 oz',                                    to:null},
+        casePack:    {from:'10ct',                                       to:'12ct'},
+        productCode: {from:'10607403',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$5.29',                                      to:null},
+        sdv:         {from:'$50.80',                                     to:null},
+        tradeMargin: {from:'16.9%',                                      to:null},
+        changeDate:'06/10/26', reason:'Pack size optimization for club channel',
+    },
+    // 4 ─ Brand + Description  ▸ HIGH
+    {
+        id:'UPC-004', bu:'FLNA', vendor:'FRIT1', customer:'Target', mfgId:'028400',
+        brand:       {from:'FRITOS',                                     to:'FRITO-LAY'},
+        description: {from:'Fritos Original 9.25oz',                     to:'Frito-Lay Fritos Original Corn Chips 9.25oz'},
+        upc:         {from:'028400000275',                               to:null},
+        tradeUpc:    {from:'028400-54045-2',                             to:null},
+        caseGtin:    {from:'000284000536448',                            to:null},
+        ozWeight:    {from:'9.25 oz',                                    to:null},
+        casePack:    {from:'10ct',                                       to:null},
+        productCode: {from:'10607404',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$4.99',                                      to:null},
+        sdv:         {from:'$48.00',                                     to:null},
+        tradeMargin: {from:'15.8%',                                      to:null},
+        changeDate:'06/08/26', reason:'Corporate brand consolidation under Frito-Lay umbrella',
+    },
+    // 5 ─ Product Code changed  ▸ HIGH
+    {
+        id:'UPC-005', bu:'FLNA', vendor:'FRIT1', customer:'Costco', mfgId:'052000',
+        brand:       {from:'CHEETOS',                                    to:null},
+        description: {from:'Cheetos Puffs Jumbo Bag 9oz',               to:null},
+        upc:         {from:'028400000075',                               to:null},
+        tradeUpc:    {from:'028400-54046-9',                             to:null},
+        caseGtin:    {from:'000284000536456',                            to:null},
+        ozWeight:    {from:'9.0 oz',                                     to:null},
+        casePack:    {from:'8ct',                                        to:null},
+        productCode: {from:'10607401',                                   to:'11365001'},
+        priceArea:   {from:'CLUB',                                       to:null},
+        srp:         {from:'$5.79',                                      to:null},
+        sdv:         {from:'$55.20',                                     to:null},
+        tradeMargin: {from:'18.8%',                                      to:null},
+        changeDate:'06/05/26', reason:'Internal product code migration to new ERP system',
+    },
+    // 6 ─ Price Area + SRP/SDV/Margin  ▸ HIGH
+    {
+        id:'UPC-006', bu:'PBNA', vendor:'PBC01', customer:'Amazon.com', mfgId:'012000',
+        brand:       {from:'PEPSI',                                      to:null},
+        description: {from:'Pepsi Cola 12pk 12oz Cans',                  to:null},
+        upc:         {from:'012000001481',                               to:null},
+        tradeUpc:    {from:'012000-54047-6',                             to:null},
+        caseGtin:    {from:'001200000140018',                            to:null},
+        ozWeight:    {from:'12 fl oz',                                   to:null},
+        casePack:    {from:'12ct',                                       to:null},
+        productCode: {from:'20891001',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:'ECOMMRETAIL'},
+        srp:         {from:'$9.99',                                      to:'$10.99'},
+        sdv:         {from:'$98.00',                                     to:'$108.00'},
+        tradeMargin: {from:'22.1%',                                      to:'22.8%'},
+        changeDate:'06/03/26', reason:'eCommerce price area reclassification',
+    },
+    // 7 ─ Description-only cleanup  ▸ LOW
+    {
+        id:'UPC-007', bu:'QUAKER', vendor:'QKRO1', customer:'Walmart', mfgId:'030000',
+        brand:       {from:'QUAKER',                                     to:null},
+        description: {from:'Quaker Oats Old Fashioned 42oz',            to:'Quaker Old Fashioned Oats, 42 oz'},
+        upc:         {from:'030000014100',                               to:null},
+        tradeUpc:    {from:'030000-54048-3',                             to:null},
+        caseGtin:    {from:'003000001410018',                            to:null},
+        ozWeight:    {from:'42 oz',                                      to:null},
+        casePack:    {from:'6ct',                                        to:null},
+        productCode: {from:'30112001',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$5.99',                                      to:null},
+        sdv:         {from:'$57.60',                                     to:null},
+        tradeMargin: {from:'19.8%',                                      to:null},
+        changeDate:'06/01/26', reason:'Product description standardization per brand guidelines',
+    },
+    // 8 ─ Trade UPC + UPC  ▸ HIGH
+    {
+        id:'UPC-008', bu:'FLNA', vendor:'FRIT1', customer:"Sam's Club", mfgId:'028400',
+        brand:       {from:"LAY'S",                                      to:null},
+        description: {from:"Lay's Kettle Cooked Jalapeño Flavored Potato Chips 8oz", to:null},
+        upc:         {from:'028400000200',                               to:'028400004176'},
+        tradeUpc:    {from:'028400-54042-1',                             to:'028400-79781-8'},
+        caseGtin:    {from:'000284000536464',                            to:null},
+        ozWeight:    {from:'8.0 oz',                                     to:null},
+        casePack:    {from:'8ct',                                        to:null},
+        productCode: {from:'10607408',                                   to:null},
+        priceArea:   {from:'CLUB',                                       to:null},
+        srp:         {from:'$4.99',                                      to:null},
+        sdv:         {from:'$48.00',                                     to:null},
+        tradeMargin: {from:'16.5%',                                      to:null},
+        changeDate:'05/28/26', reason:'Trade UPC refresh — previous Trade UPC retired',
+    },
+    // 9 ─ Oz Weight only  ▸ HIGH
+    {
+        id:'UPC-009', bu:'FLNA', vendor:'FRIT1', customer:'Amazon Fresh', mfgId:'028400',
+        brand:       {from:'RUFFLES',                                    to:null},
+        description: {from:'Ruffles Cheddar & Sour Cream Flavored Potato Chips 8.5oz', to:null},
+        upc:         {from:'028400000326',                               to:null},
+        tradeUpc:    {from:'028400-54049-0',                             to:null},
+        caseGtin:    {from:'000284000536480',                            to:null},
+        ozWeight:    {from:'9.25 oz',                                    to:'10.0 oz'},
+        casePack:    {from:'8ct',                                        to:null},
+        productCode: {from:'10607409',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$5.29',                                      to:null},
+        sdv:         {from:'$50.80',                                     to:null},
+        tradeMargin: {from:'17.3%',                                      to:null},
+        changeDate:'05/25/26', reason:'Weight increase per manufacturing update',
+    },
+    // 10 ─ Trade Margin only  ▸ MEDIUM
+    {
+        id:'UPC-010', bu:'PBNA', vendor:'PBC01', customer:'Kroger', mfgId:'052000',
+        brand:       {from:'GATORADE',                                   to:null},
+        description: {from:'Gatorade Thirst Quencher Orange 32oz',       to:null},
+        upc:         {from:'052000001481',                               to:null},
+        tradeUpc:    {from:'052000-54050-6',                             to:null},
+        caseGtin:    {from:'005200000140050',                            to:null},
+        ozWeight:    {from:'32 fl oz',                                   to:null},
+        casePack:    {from:'12ct',                                       to:null},
+        productCode: {from:'20892001',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$2.49',                                      to:null},
+        sdv:         {from:'$24.00',                                     to:null},
+        tradeMargin: {from:'21.0%',                                      to:'24.0%'},
+        changeDate:'05/20/26', reason:'Trade margin renegotiated with Kroger',
+    },
+    // 11 ─ SDV only  ▸ MEDIUM
+    {
+        id:'UPC-011', bu:'PBNA', vendor:'STAR1', customer:'Amazon.com', mfgId:'012000',
+        brand:       {from:'STARBUCKS',                                  to:null},
+        description: {from:'Starbucks Frappuccino Mocha 13.7oz',        to:null},
+        upc:         {from:'012000301481',                               to:null},
+        tradeUpc:    {from:'012000-54051-3',                             to:null},
+        caseGtin:    {from:'001200000140051',                            to:null},
+        ozWeight:    {from:'13.7 fl oz',                                 to:null},
+        casePack:    {from:'12ct',                                       to:null},
+        productCode: {from:'20893001',                                   to:null},
+        priceArea:   {from:'ECOMMRETAIL',                                to:null},
+        srp:         {from:'$4.99',                                      to:null},
+        sdv:         {from:'$48.00',                                     to:'$52.00'},
+        tradeMargin: {from:'24.2%',                                      to:null},
+        changeDate:'05/18/26', reason:'SDV adjustment per trade spend review',
+    },
+    // 12 ─ SRP only  ▸ MEDIUM
+    {
+        id:'UPC-012', bu:'FLNA', vendor:'FRIT1', customer:'Target', mfgId:'028400',
+        brand:       {from:'TOSTITOS',                                   to:null},
+        description: {from:"Tostitos Scoops! Tortilla Chips 10oz",      to:null},
+        upc:         {from:'028400000325',                               to:null},
+        tradeUpc:    {from:'028400-54052-0',                             to:null},
+        caseGtin:    {from:'000284000536488',                            to:null},
+        ozWeight:    {from:'10.0 oz',                                    to:null},
+        casePack:    {from:'8ct',                                        to:null},
+        productCode: {from:'10607412',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$4.99',                                      to:'$5.49'},
+        sdv:         {from:'$48.00',                                     to:null},
+        tradeMargin: {from:'17.2%',                                      to:null},
+        changeDate:'05/15/26', reason:'Category SRP realignment per planogram reset',
+    },
+    // 13 ─ Description + UPC + Case Pack + SRP  ▸ HIGH
+    {
+        id:'UPC-013', bu:'PBNA', vendor:'PBC01', customer:'Amazon.com', mfgId:'012000',
+        brand:       {from:'MTN DEW',                                    to:null},
+        description: {from:'Mountain Dew Baja Blast 20oz',              to:'Mountain Dew Baja Blast Tropical Lime 20oz'},
+        upc:         {from:'012000201481',                               to:'012000204512'},
+        tradeUpc:    {from:'012000-54053-7',                             to:'012000-58001-2'},
+        caseGtin:    {from:'001200000204481',                            to:null},
+        ozWeight:    {from:'20 fl oz',                                   to:null},
+        casePack:    {from:'20ct',                                       to:'24ct'},
+        productCode: {from:'20894001',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$2.29',                                      to:'$2.49'},
+        sdv:         {from:'$44.00',                                     to:'$48.00'},
+        tradeMargin: {from:'20.5%',                                      to:null},
+        changeDate:'05/12/26', reason:'Flavor name update + case pack expansion + price increase',
+    },
+    // 14 ─ Product Code + Case GTIN + Price Area  ▸ HIGH
+    {
+        id:'UPC-014', bu:'FLNA', vendor:'FRIT1', customer:'Costco', mfgId:'028400',
+        brand:       {from:'SUNCHIPS',                                   to:null},
+        description: {from:'SunChips Garden Salsa Whole Grain Snacks 7oz', to:null},
+        upc:         {from:'028400000400',                               to:null},
+        tradeUpc:    {from:'028400-54054-4',                             to:null},
+        caseGtin:    {from:'000284000536492',                            to:'000284000712001'},
+        ozWeight:    {from:'7.0 oz',                                     to:null},
+        casePack:    {from:'10ct',                                       to:null},
+        productCode: {from:'10607414',                                   to:'11365014'},
+        priceArea:   {from:'CLUB',                                       to:'ECOMMRETAIL'},
+        srp:         {from:'$4.79',                                      to:null},
+        sdv:         {from:'$46.00',                                     to:null},
+        tradeMargin: {from:'15.6%',                                      to:null},
+        changeDate:'05/10/26', reason:'Channel reclassification from club to eCommerce',
+    },
+    // 15 ─ Description + Brand + SRP  ▸ HIGH
+    {
+        id:'UPC-015', bu:'PBNA', vendor:'PBC01', customer:'Walmart', mfgId:'012000',
+        brand:       {from:'ROCKSTAR',                                   to:'ROCKSTAR ENERGY'},
+        description: {from:'Rockstar Energy Original 16oz 24pk',        to:'Rockstar Energy Drink Original 16 fl oz, 24pk'},
+        upc:         {from:'012000401481',                               to:null},
+        tradeUpc:    {from:'012000-54055-1',                             to:null},
+        caseGtin:    {from:'001200000401481',                            to:null},
+        ozWeight:    {from:'16 fl oz',                                   to:null},
+        casePack:    {from:'24ct',                                       to:null},
+        productCode: {from:'20895001',                                   to:null},
+        priceArea:   {from:'NATL',                                       to:null},
+        srp:         {from:'$3.29',                                      to:'$3.49'},
+        sdv:         {from:'$79.20',                                     to:'$83.76'},
+        tradeMargin: {from:'23.5%',                                      to:null},
+        changeDate:'05/08/26', reason:'Brand identity update + price increase',
+    },
+];

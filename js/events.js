@@ -765,12 +765,24 @@ const EventHandler = {
         const ftRow = (label, field) => {
             if (!field) return '';
             const hasChange = field.to !== null;
+
+            // Handle both old format (from) and new format (fromList)
+            const oldValues = field.fromList || (field.from ? [field.from] : []);
+            const primaryOld = oldValues[0];
+            const hasMultiple = oldValues.length > 1;
+
+            let oldValuesHtml = `<div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(primaryOld)}</div>`;
+            if (hasMultiple) {
+                const otherUpcs = oldValues.slice(1).map(u => `<div style="font-size:11px;color:#9CA3AF;line-height:1.4;">  • ${escapeHtml(u)}</div>`).join('');
+                oldValuesHtml += otherUpcs;
+            }
+
             return `<div style="margin-bottom:16px;">
                 <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">${label}</div>
                 ${hasChange
                     ? `<div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(field.to)}</div>
-                       <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(field.from)}</div>`
-                    : `<div style="font-size:13px;color:#374151;">${escapeHtml(field.from || '—')}</div>`
+                       ${oldValuesHtml}`
+                    : `<div style="font-size:13px;color:#374151;">${escapeHtml(primaryOld || '—')}</div>`
                 }
             </div>`;
         };

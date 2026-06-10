@@ -238,15 +238,56 @@ const UIManager = {
 
     _ftCell(field) {
         if (!field) return '<span style="color:#D1D5DB;font-size:12px;">—</span>';
-        if (field.to === null || field.from === field.to) {
-            return `<span style="font-size:12px;color:#374151;">${escapeHtml(field.from || '—')}</span>`;
+
+        // Handle both old format (from) and new format (fromList)
+        const oldValues = field.fromList || (field.from ? [field.from] : []);
+        const primaryOld = oldValues[0];
+        const hasMultiple = oldValues.length > 1;
+
+        if (field.to === null || (primaryOld === field.to && !hasMultiple)) {
+            return `<span style="font-size:12px;color:#374151;">${escapeHtml(primaryOld || '—')}</span>`;
         }
-        return `<div>
-            <div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(field.to)}</div>
-            <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(field.from)}</div>
+
+        let badgeHtml = '';
+        if (hasMultiple) {
+            const restUpcs = oldValues.slice(1).map(u => escapeHtml(u)).join('<br>');
+            badgeHtml = `<span class="has-tooltip" style="display:inline-flex;align-items:center;margin-left:6px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:600;cursor:help;white-space:nowrap;">
+                +${oldValues.length - 1}
+                <div class="tooltip-content" style="font-size:11px;padding:6px 10px;text-align:left;top:-10px;left:100%;transform:translateY(-100%);white-space:nowrap;z-index:10000;">
+                    ${restUpcs}
+                </div>
+            </span>`;
+        }
+
+        return `<div style="display:flex;align-items:flex-start;gap:4px;">
+            <div>
+                <div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(field.to)}</div>
+                <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(primaryOld)}</div>
+            </div>
+            ${badgeHtml}
         </div>`;
     },
 
+
+    _filterUpcChangeData(data, searchTerm) {
+        if (!searchTerm || !searchTerm.trim()) return data;
+        const lower = searchTerm.toLowerCase().trim();
+        return data.filter(rec => {
+            const fields = [
+                rec.brand?.from, rec.brand?.to,
+                rec.description?.from, rec.description?.to,
+                rec.vendor, rec.customer, rec.bu,
+            ];
+            // Check regular fields
+            if (fields.some(f => (f || '').toLowerCase().includes(lower))) return true;
+            // Check all old UPCs
+            const oldUpcs = rec.upc?.fromList || (rec.upc?.from ? [rec.upc.from] : []);
+            if (oldUpcs.some(u => u.toLowerCase().includes(lower))) return true;
+            // Check new UPC
+            if ((rec.upc?.to || '').toLowerCase().includes(lower)) return true;
+            return false;
+        });
+    },
 
     renderUpcChangeMatrix() {
         const tableContainer = document.querySelector('.table-container');
@@ -263,7 +304,10 @@ const UIManager = {
         }
         section.style.display = 'block';
 
-        const data = typeof upcChangeData !== 'undefined' ? upcChangeData : [];
+        let data = typeof upcChangeData !== 'undefined' ? upcChangeData : [];
+        // Apply search filter
+        const searchTerm = DataStore.state.filters.searchTerm;
+        data = this._filterUpcChangeData(data, searchTerm);
 
         const countEl = document.querySelector('.items-count');
         if (countEl) countEl.textContent = `${data.length} UPC Changes`;

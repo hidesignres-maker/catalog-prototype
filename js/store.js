@@ -126,7 +126,17 @@ const FilterStrategies = {
             item.brand, item.customer, item.category, item.subCategory,
             item.status, item.bu,
         ].map(v => (v || '').toLowerCase());
-        return fields.some(f => f.includes(lower));
+
+        // Check basic fields
+        if (fields.some(f => f.includes(lower))) return true;
+
+        // Check old UPCs if available (from UPC change records)
+        if (item.upcOld) {
+            const oldUpc = (item.upcOld || '').toLowerCase();
+            if (oldUpc.includes(lower)) return true;
+        }
+
+        return false;
     },
     status: (item, statuses) => {
         if (!statuses || statuses.length === 0) return true;
