@@ -697,6 +697,7 @@ select {
     overflow-y: visible;
     border: 1px solid var(--border);
     border-radius: 4px;
+    position: relative;
 }
 
 table {
@@ -919,7 +920,7 @@ input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-colo
 }
 
 /* UPC Badge tooltip - show on hover */
-.upc-badge-tooltip:hover > div {
+.upc-badge-tooltip:hover > .upc-tooltip-content {
     visibility: visible !important;
     opacity: 1 !important;
 }
