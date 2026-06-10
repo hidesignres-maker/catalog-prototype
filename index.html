@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Assortment - PepsiCo Catalog</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Cargar Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="menu-icon"><i data-lucide="menu"></i></div>
+    </nav>
+
+    <main class="container">
+        <header class="page-header">
+            <h1>National Assortment</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary">Add New Product</button>
+                <button class="btn btn-secondary">Export</button>
+            </div>
+        </header>
+
+        <section class="kpis">
+            <div class="kpi-card">
+                <div class="kpi-title">TOTAL ITEMS</div>
+                <div class="kpi-value" id="kpi-total">--</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">ACTIVE / HUB ACTIVE</div>
+                <div class="kpi-value" id="kpi-active">--</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">PIPELINE (2026)</div>
+                <div class="kpi-value" id="kpi-pipeline">--</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">LTO ITEMS</div>
+                <div class="kpi-value" id="kpi-lto">--</div>
+            </div>
+        </section>
+
+        <section class="sub-nav" style="justify-content: center; margin-bottom: 32px;">
+            <div class="segmented-control">
+                <button class="segmented-btn active" data-view="total">Total Items</button>
+                <button class="segmented-btn" data-view="disco"><i data-lucide="ban" style="width: 16px; height: 16px;"></i> Discontinuations</button>
+                <button class="segmented-btn" data-view="upc"><i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i> UPC changes</button>
+            </div>
+        </section>
+
+        <section class="controls-area">
+            <div class="filters-left" style="flex-wrap:wrap; gap:6px;">
+                <div class="search-box" style="flex-shrink:0; min-width:190px;">
+                    <i data-lucide="search" style="width: 16px; height: 16px; color: var(--muted-text);"></i>
+                    <input type="text" placeholder="Search ASIN, title, brand, UPC, vendor code…" style="min-width:160px;">
+                </div>
+
+                <!-- Customer Quick Filter (dynamically populated) -->
+                <div class="filter-dropdown multi-select" data-filter="clientFilter" style="flex-shrink:0;">
+                    <button class="dropdown-trigger"><span>All Customers</span> <i data-lucide="chevron-down" style="width:14px;height:14px;"></i></button>
+                    <div class="dropdown-menu" id="customerFilterMenu">
+                        <div class="dropdown-item mixed-item active"><span>All Customers</span><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                </div>
+
+                <!-- Status Quick Filter -->
+                <div class="filter-dropdown multi-select" data-filter="statusFilter" style="flex-shrink:0; min-width:120px;">
+                    <button class="dropdown-trigger" style="min-width:100px;"><span>All Statuses</span> <i data-lucide="chevron-down" style="width:14px;height:14px;"></i></button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item mixed-item active" style="color:#6b7280; font-weight:500;"><span>All Statuses</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-pipeline"></div> Pipeline</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-prelaunch"></div> Pre-launch</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-active"></div> Active</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-hubactive"></div> Hub Active</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-lto"></div> LTO</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-upcchanges"></div> UPC Changes</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-discontinuing"></div> Discontinuing</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-discontinued"></div> DISCO</span><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="dropdown-item"><span style="display:flex; align-items:center; gap:8px;"><div class="status-dot dot-unknown"></div> Unknown - review</span><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                </div>
+
+                <!-- Brand Quick Filter (dynamically populated) -->
+                <div class="filter-dropdown multi-select" data-filter="brandFilter" style="flex-shrink:0;">
+                    <button class="dropdown-trigger"><span>Brand</span> <i data-lucide="chevron-down" style="width:14px;height:14px;"></i></button>
+                    <div class="dropdown-menu" id="brandFilterMenu">
+                        <div class="dropdown-item mixed-item active"><span>All Brands</span><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                </div>
+
+                <!-- Vendor Code Quick Filter (dynamically populated) -->
+                <div class="filter-dropdown multi-select" data-filter="vendorFilter" style="flex-shrink:0;">
+                    <button class="dropdown-trigger"><span>Vendor Code</span> <i data-lucide="chevron-down" style="width:14px;height:14px;"></i></button>
+                    <div class="dropdown-menu" id="vendorFilterMenu">
+                        <div class="dropdown-item mixed-item active"><span>All Vendors</span><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                </div>
+
+                <!-- More Filters -->
+                <button id="moreFiltersBtn" class="btn btn-outline" style="display:flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0;">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.5 3.5h11M3.5 7h7M5.5 10.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                    More filters
+                    <span id="moreFiltersBadge" style="display:none; background:#2185F4; color:#fff; border-radius:10px; padding:0 6px; font-size:11px; font-weight:700; line-height:18px; min-width:18px; text-align:center;">0</span>
+                </button>
+            </div>
+            <div class="actions-right">
+                <span class="items-count" style="font-size:13px; color:var(--muted-text); white-space:nowrap;">-- ASINs</span>
+                <button id="openTagModalBtn" class="btn btn-outline"><i data-lucide="tag" style="width: 14px; height: 14px;"></i> Tag</button>
+                <button class="btn btn-outline"><i data-lucide="x" style="width: 14px; height: 14px;"></i> Dismiss</button>
+            </div>
+        </section>
+
+        <!-- ACTIVE FILTER CHIPS -->
+        <div id="active-chips-row" style="display:none; align-items:center; flex-wrap:wrap; gap:6px; padding:6px 0 8px; min-height:32px;">
+            <div id="chips-container" style="display:flex; flex-wrap:wrap; gap:6px; flex:1;"></div>
+            <button id="clear-all-filters-btn" style="font-size:12px; font-weight:600; color:#2185F4; background:none; border:none; cursor:pointer; white-space:nowrap; padding:4px 6px; flex-shrink:0;">Clear all</button>
+        </div>
+
+        <!-- BULK ACTION BAR -->
+        <div id="bulk-action-bar" style="display:none; align-items:center; gap:10px; padding:9px 14px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; margin-bottom:8px;">
+            <span id="bulk-selected-count" style="font-size:13px; font-weight:600; color:#1D4ED8; white-space:nowrap;">0 items selected</span>
+            <div style="flex:1;"></div>
+            <button id="bulk-clear-btn" style="padding:5px 13px; border:1px solid #BFDBFE; border-radius:6px; background:#fff; font-size:13px; font-weight:500; color:#374151; cursor:pointer;">Clear selection</button>
+            <button id="bulk-edit-btn" style="padding:5px 13px; border:none; border-radius:6px; background:#2185F4; font-size:13px; font-weight:600; color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.917 1.75a1.458 1.458 0 0 1 2.063 2.063L4.667 11.125l-2.917.583.583-2.916L9.917 1.75z" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Edit selected
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>
+                            <label class="header-toggle">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </th>
+                        <th><div style="display:flex; align-items:center;">STATUS <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">BU <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center; gap:2px;">CUSTOMER <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:2px; opacity:0.4;"></i><button class="col-filter-btn" data-field="customer" title="Filter by Customer" style="background:none;border:none;cursor:pointer;padding:2px;color:#9CA3AF;display:flex;align-items:center;"><i data-lucide="filter" style="width:10px;height:10px;"></i></button></div></th>
+                        <th><div style="display:flex; align-items:center; gap:2px;">VENDOR CODE <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:2px; opacity:0.4;"></i><button class="col-filter-btn" data-field="vendor" title="Filter by Vendor Code" style="background:none;border:none;cursor:pointer;padding:2px;color:#9CA3AF;display:flex;align-items:center;"><i data-lucide="filter" style="width:10px;height:10px;"></i></button></div></th>
+                        <th><div style="display:flex; align-items:center; gap:2px;">RETAILER SKU <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:2px; opacity:0.4;"></i><button class="col-filter-btn" data-field="sku" title="Filter by ASIN/SKU" style="background:none;border:none;cursor:pointer;padding:2px;color:#9CA3AF;display:flex;align-items:center;"><i data-lucide="filter" style="width:10px;height:10px;"></i></button></div></th>
+                        <th><div style="display:flex; align-items:center;">UPC <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">GTIN <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center; gap:2px;">ITEM TITLE <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:2px; opacity:0.4;"></i><button class="col-filter-btn" data-field="title" title="Filter by Title" style="background:none;border:none;cursor:pointer;padding:2px;color:#9CA3AF;display:flex;align-items:center;"><i data-lucide="filter" style="width:10px;height:10px;"></i></button></div></th>
+                        <th><div style="display:flex; align-items:center;">TAGS <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">SIZE CATEGORY <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center; gap:2px;">FINANCE PACK SIZE <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:2px; opacity:0.4;"></i><button class="col-filter-btn" data-field="packType" title="Filter by Finance Pack Size" style="background:none;border:none;cursor:pointer;padding:2px;color:#9CA3AF;display:flex;align-items:center;"><i data-lucide="filter" style="width:10px;height:10px;"></i></button></div></th>
+                        <th><div style="display:flex; align-items:center;">PACK COUNT <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">BRAND <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">SUB-BRAND <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">REGION <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">CATEGORY <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">SUB-CATEGORY <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">FORM <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">UNIT COST <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center; gap:2px;">SRP <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:2px; opacity:0.4;"></i><button class="col-filter-btn" data-field="srp" title="Filter by SRP" style="background:none;border:none;cursor:pointer;padding:2px;color:#9CA3AF;display:flex;align-items:center;"><i data-lucide="filter" style="width:10px;height:10px;"></i></button></div></th>
+                        <th><div style="display:flex; align-items:center; gap:2px;">CASE COST <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:2px; opacity:0.4;"></i><button class="col-filter-btn" data-field="cogs" title="Filter by Case Cost" style="background:none;border:none;cursor:pointer;padding:2px;color:#9CA3AF;display:flex;align-items:center;"><i data-lucide="filter" style="width:10px;height:10px;"></i></button></div></th>
+                        <th><div style="display:flex; align-items:center;">RSV PY <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">RSV YTD <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">2024 RSV <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">RESET DATE <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">IN-MARKET DATE <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                        <th><div style="display:flex; align-items:center;">LAST UPDATED <i data-lucide="chevrons-up-down" style="width:12px; height:12px; margin-left:4px; opacity:0.4;"></i></div></th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Table rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <section class="pagination" style="margin-top: 16px; justify-content: flex-end; padding-right: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 13px; color: var(--muted-text);">Rows per page:</span>
+                <select class="page-size-select" style="width: 70px;">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </section>
+    </main>
+
+    <!-- SIDE DRAWER FOR COMPLEX INTERACTIONS -->
+    <div class="side-drawer-overlay" id="drawerOverlay"></div>
+    <div class="side-drawer" id="productDrawer">
+        <div class="drawer-header">
+            <h2>Product Details</h2>
+            <button class="close-drawer" id="closeDrawerBtn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="drawer-content" id="drawerContent">
+            <!-- Dynamic content will be injected here -->
+            <p style="color: var(--muted-text); font-size: 14px;">Select a product from the table to view or edit details.</p>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" id="cancelDrawerBtn">Cancel</button>
+            <button class="btn btn-primary">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Modular JS Architecture -->
+    <script src="js/constants.js"></script>
+    <script src="js/tags.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/columns.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <!-- TAG MODAL OVERLAY -->
+    <div class="modal-overlay" id="tagModalOverlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <h2 style="font-size: 20px; font-weight: 600; color: #111827;">Add Tag</h2>
+                    <span class="badge-selected" id="tagModalSelectedCount">0 items selected</span>
+                </div>
+                <button class="close-modal" id="closeTagModalBtn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="search-input-wrapper">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="tagModalSearch" placeholder="Search Tags...">
+                </div>
+                
+                <div class="warning-banner" id="tagModalWarning" style="display:none;">
+                    <i data-lucide="zap" class="warning-icon"></i>
+                    <div class="warning-text">
+                        <strong>Shared tag names across channels:</strong> <span id="sharedTagNames"></span> selecting one does not select the other. Each channel tag is independent.
+                    </div>
+                </div>
+
+                <div class="tags-container" id="tagModalContent">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span class="tags-apply-count" id="tagModalApplyCount">0 tags to apply</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" id="cancelTagModalBtn">Cancel</button>
+                    <button class="btn btn-primary" id="applyTagModalBtn">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULK EDIT MODAL -->
+    <div class="modal-overlay" id="bulkEditModalOverlay" style="display:none;">
+        <div class="modal" style="width:520px; max-width:95vw;">
+            <div class="modal-header">
+                <div>
+                    <h2 style="font-size:18px; font-weight:600; color:#111827;">Bulk edit selected items</h2>
+                    <p id="bulkEditSubtitle" style="font-size:13px; color:#6B7280; margin-top:3px;">Editing 0 selected items</p>
+                </div>
+                <button id="closeBulkEditModalBtn" style="background:none; border:none; cursor:pointer; color:#6B7280; padding:4px; display:flex; align-items:center;">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 13.5L13.5 4.5M4.5 4.5L13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:#6B7280; margin-bottom:20px; line-height:1.5;">You are applying one value to all selected items. Changes will update the selected rows after you confirm.</p>
+                <div style="display:flex; gap:12px; margin-bottom:20px;">
+                    <div style="flex:1;">
+                        <label style="display:block; font-size:11px; font-weight:700; color:#6B7280; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Field to update</label>
+                        <select id="bulkEditFieldSelect" style="width:100%; padding:9px 12px; border:1px solid #D1D5DB; border-radius:6px; font-size:14px; color:#111827; background:#fff; cursor:pointer;">
+                            <option value="">— Select field —</option>
+                            <option value="srp">SRP</option>
+                            <option value="unitCost">Unit Cost</option>
+                            <option value="cogs">Case Cost</option>
+                            <option value="rsvPy">RSV PY</option>
+                            <option value="rsvYtd">RSV YTD</option>
+                            <option value="rsvFinancePackSize2024">2024 RSV</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block; font-size:11px; font-weight:700; color:#6B7280; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">New value</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#6B7280; font-size:14px; pointer-events:none;">$</span>
+                            <input type="text" id="bulkEditValueInput" placeholder="0.00" style="width:100%; padding:9px 12px 9px 22px; border:1px solid #D1D5DB; border-radius:6px; font-size:14px; color:#111827;">
+                        </div>
+                    </div>
+                </div>
+                <!-- Collapsible selected items list -->
+                <div style="border:1px solid #E5E7EB; border-radius:6px; overflow:hidden;">
+                    <button id="bulkViewToggleBtn" style="width:100%; padding:10px 14px; background:#F9FAFB; border:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#374151; font-weight:500;">
+                        <span>View selected items</span>
+                        <svg id="bulkViewChevron" width="14" height="14" viewBox="0 0 14 14" fill="none" style="transition:transform 0.2s; flex-shrink:0;"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div id="bulkSelectedItemsList" style="display:none; max-height:160px; overflow-y:auto; background:#fff; border-top:1px solid #E5E7EB;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div></div>
+                <div style="display:flex; gap:8px;">
+                    <button id="cancelBulkEditBtn" class="btn btn-secondary">Cancel</button>
+                    <button id="applyBulkEditBtn" class="btn btn-primary" disabled style="opacity:0.5;">Apply changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MORE FILTERS POPOVER -->
+    <div id="moreFiltersPopover" style="display:none; position:fixed; z-index:9500; background:#fff; border:1px solid #E5E7EB; border-radius:10px; box-shadow:0 8px 28px rgba(0,0,0,0.13); width:540px; max-width:96vw;">
+        <div style="padding:14px 18px 12px; border-bottom:1px solid #F3F4F6; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:14px; font-weight:600; color:#111827;">More filters</span>
+            <button id="closeMoreFiltersBtn" style="background:none; border:none; cursor:pointer; color:#9CA3AF; padding:2px; display:flex; align-items:center;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 12L12 4M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div id="moreFiltersConditions" style="padding:12px 18px; display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; min-height:60px;">
+            <!-- condition rows injected by JS -->
+        </div>
+        <div style="padding:6px 18px 12px;">
+            <button id="addConditionBtn" style="background:none; border:none; cursor:pointer; font-size:13px; font-weight:500; color:#2185F4; padding:4px 0; display:flex; align-items:center; gap:5px;">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5v10M1.5 6.5h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Add condition
+            </button>
+        </div>
+        <div style="padding:12px 18px; border-top:1px solid #F3F4F6; display:flex; justify-content:flex-end; gap:8px;">
+            <button id="cancelMoreFiltersBtn" class="btn btn-secondary" style="padding:7px 16px;">Cancel</button>
+            <button id="applyMoreFiltersBtn" class="btn btn-primary" style="padding:7px 16px;">Apply filters</button>
+        </div>
+    </div>
+
+    <!-- TAG FILTER DROPDOWN (added to filters-left) -->
+</body>
+
+</html>
