@@ -366,10 +366,7 @@ const UIManager = {
                 <td style="padding:10px 12px;">${this._ftCell(rec.srp)}</td>
                 <td style="padding:10px 12px;">${this._ftCell(rec.sdv)}</td>
                 <td style="padding:10px 12px;white-space:nowrap;">
-                    <span class="audit-trail-link" data-id="${escapeHtml(rec.id)}" style="color:#2185F4;font-weight:500;cursor:pointer;font-size:12px;white-space:nowrap;" title="View Audit Trail">${escapeHtml(lastUpdated)}</span>
-                </td>
-                <td style="padding:10px 12px;white-space:nowrap;">
-                    <span class="upc-review-link" data-id="${escapeHtml(rec.id)}" style="${actionStyle}font-size:12px;white-space:nowrap;" title="Review Change">${escapeHtml(actionLabel)}</span>
+                    <span class="audit-trail-link" data-id="${escapeHtml(rec.id)}" style="color:#2185F4;font-weight:500;cursor:pointer;font-size:12px;white-space:nowrap;" title="View Change History">${escapeHtml(lastUpdated)}</span>
                 </td>
             </tr>`;
         }).join('');
@@ -392,7 +389,6 @@ const UIManager = {
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">SRP</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">SDV</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Last Updated</th>
-                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Action</th>
                         </tr>
                     </thead>
                     <tbody>${rowsHtml}</tbody>
@@ -401,14 +397,6 @@ const UIManager = {
         </div>`;
 
         section.onclick = (e) => {
-            const reviewLink = e.target.closest('.upc-review-link');
-            if (reviewLink) {
-                const id  = reviewLink.dataset.id;
-                const rec = data.find(r => r.id === id);
-                if (rec && typeof EventHandler !== 'undefined') EventHandler.openUpcChangeDrawer(rec);
-                return;
-            }
-
             const auditLink = e.target.closest('.audit-trail-link');
             if (auditLink) {
                 const id  = auditLink.dataset.id;

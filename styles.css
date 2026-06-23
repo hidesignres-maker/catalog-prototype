@@ -919,22 +919,10 @@ input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-colo
     opacity: 1;
 }
 
-/* UPC Badge tooltip - show on hover */
+/* UPC Badge tooltip - show on hover with JavaScript positioning */
 .upc-badge-tooltip:hover > .upc-tooltip-content {
     visibility: visible !important;
     opacity: 1 !important;
-}
-
-/* Position UPC tooltip relative to badge */
-.upc-badge-tooltip:hover > .upc-tooltip-content {
-    bottom: auto !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-}
-
-.upc-badge-tooltip .upc-tooltip-content {
-    margin-top: -200px !important;
 }
 
 .has-tooltip .tooltip-content::before {
