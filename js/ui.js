@@ -413,7 +413,7 @@ const UIManager = {
             if (auditLink) {
                 const id  = auditLink.dataset.id;
                 const rec = data.find(r => r.id === id);
-                if (rec && typeof EventHandler !== 'undefined') EventHandler.openAuditTrailDrawer(rec);
+                if (rec && typeof EventHandler !== 'undefined') EventHandler.openUpcChangeAuditDrawer(rec);
                 return;
             }
         };

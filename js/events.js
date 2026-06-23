@@ -744,6 +744,134 @@ const EventHandler = {
         UIManager.updateUI();
     },
 
+    openUpcChangeAuditDrawer(record) {
+        const drawerOverlay = document.getElementById('drawerOverlay');
+
+        let drawer = document.getElementById('upcAuditDrawer');
+        if (!drawer) {
+            drawer = document.createElement('div');
+            drawer.id = 'upcAuditDrawer';
+            drawer.className = 'side-drawer';
+            drawer.style.width = '560px';
+            document.body.appendChild(drawer);
+        }
+
+        const closeDrawer = () => {
+            drawer.classList.remove('open');
+            setTimeout(() => drawerOverlay?.classList.remove('active'), 300);
+        };
+
+        // Get all changes from record
+        const changes = [];
+        const fieldLabels = {
+            brand: 'Brand',
+            description: 'Description',
+            upc: 'UPC',
+            tradeUpc: 'Trade UPC',
+            caseGtin: 'Case GTIN',
+            ozWeight: 'Oz Weight',
+            casePack: 'Case Pack',
+            productCode: 'Product Code',
+            priceArea: 'Price Area',
+            srp: 'SRP',
+            sdv: 'SDV',
+            tradeMargin: 'Trade Margin'
+        };
+
+        Object.entries(fieldLabels).forEach(([key, label]) => {
+            if (record[key] && record[key].to !== null) {
+                const fromValue = record[key].fromList ? record[key].fromList[0] : record[key].from;
+                changes.push({
+                    field: label,
+                    from: fromValue,
+                    to: record[key].to,
+                    date: record.changeDate || '06/01/26'
+                });
+            }
+        });
+
+        // Group changes by date
+        const changesByDate = {};
+        changes.forEach(change => {
+            if (!changesByDate[change.date]) changesByDate[change.date] = [];
+            changesByDate[change.date].push(change);
+        });
+
+        // Sort dates descending
+        const sortedDates = Object.keys(changesByDate).sort((a, b) => {
+            const dateA = new Date(a.split('/').reverse().join('-'));
+            const dateB = new Date(b.split('/').reverse().join('-'));
+            return dateB - dateA;
+        });
+
+        // Build expandable rows
+        const changeRowsHtml = sortedDates.map((date, idx) => `
+            <div class="audit-date-row" style="margin-bottom:12px;border:1px solid #E5E7EB;border-radius:6px;overflow:hidden;">
+                <div class="audit-date-header" style="display:flex;align-items:center;cursor:pointer;padding:12px;background:#F9FAFB;user-select:none;" data-date-idx="${idx}">
+                    <svg class="audit-date-chevron" style="width:16px;height:16px;color:#6B7280;transition:transform 0.2s;transform:rotate(0deg);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    <span style="font-weight:600;color:#111827;margin-left:8px;">${escapeHtml(date)}</span>
+                    <span style="font-size:12px;color:#6B7280;margin-left:8px;">${changesByDate[date].length} change${changesByDate[date].length > 1 ? 's' : ''}</span>
+                </div>
+                <div class="audit-date-details" style="display:none;padding:12px;background:#fff;">
+                    ${changesByDate[date].map(change => `
+                        <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #F3F4F6;">
+                            <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">${escapeHtml(change.field)}</div>
+                            <div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(change.to)}</div>
+                            <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(change.from)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        const descDisplay = record.description ? record.description.from.substring(0, 48) : record.id;
+
+        drawer.innerHTML = `
+            <div style="background:#fff;border-bottom:1px solid #E5E7EB;padding:20px 20px 16px;flex-shrink:0;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                    <div>
+                        <div style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Change History</div>
+                        <div style="font-size:15px;font-weight:700;color:#111827;line-height:1.3;">${escapeHtml(descDisplay)}</div>
+                        <div style="font-size:12px;color:#6B7280;margin-top:6px;">${escapeHtml(record.vendor)} · ${escapeHtml(record.customer)}</div>
+                    </div>
+                    <button id="closeAuditBtn" style="background:none;border:none;cursor:pointer;color:#6B7280;padding:2px;flex-shrink:0;display:flex;align-items:center;">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 13.5L13.5 4.5M4.5 4.5L13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div style="flex:1;overflow-y:auto;padding:20px;background:#fff;">
+                <div style="font-size:12px;color:#6B7280;margin-bottom:16px;">Total ${changes.length} change${changes.length > 1 ? 's' : ''} across ${sortedDates.length} date${sortedDates.length > 1 ? 's' : ''}</div>
+                ${changeRowsHtml}
+            </div>
+
+            <div style="padding:14px 20px;border-top:1px solid #E5E7EB;display:flex;gap:8px;background:#fff;flex-shrink:0;">
+                <button id="closeAuditFooterBtn" style="flex:1;padding:9px;border:1px solid #D1D5DB;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;">Close</button>
+            </div>
+        `;
+
+        drawer.querySelector('#closeAuditBtn').addEventListener('click', closeDrawer);
+        drawer.querySelector('#closeAuditFooterBtn').addEventListener('click', closeDrawer);
+
+        // Add expand/collapse functionality
+        drawer.querySelectorAll('.audit-date-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const idx = header.dataset.dateIdx;
+                const details = header.closest('.audit-date-row').querySelector('.audit-date-details');
+                const chevron = header.querySelector('.audit-date-chevron');
+                const isOpen = details.style.display !== 'none';
+
+                details.style.display = isOpen ? 'none' : 'block';
+                chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+            });
+        });
+
+        drawerOverlay?.classList.add('active');
+        setTimeout(() => drawer?.classList.add('open'), 10);
+    },
+
     openUpcChangeDrawer(record) {
         const drawerOverlay = document.getElementById('drawerOverlay');
 
