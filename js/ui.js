@@ -262,9 +262,9 @@ const UIManager = {
         let badgeHtml = '';
         if (hasMultiple) {
             const restUpcs = oldValues.slice(1).map(u => escapeHtml(u)).join('<br>');
-            badgeHtml = `<span class="upc-badge-tooltip" style="display:inline-flex;align-items:center;margin-left:6px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:600;cursor:help;white-space:nowrap;position:relative;">
+            badgeHtml = `<span class="upc-badge-tooltip" style="display:inline-flex;align-items:center;margin-left:6px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:600;cursor:help;white-space:nowrap;position:relative;z-index:100;">
                 +${oldValues.length - 1}
-                <div style="position:absolute !important;bottom:calc(100% + 8px) !important;left:50% !important;transform:translateX(-50%) !important;background:#1F2937 !important;border-radius:6px !important;padding:12px 10px !important;font-size:11px !important;text-align:left !important;white-space:normal !important;z-index:10001 !important;box-shadow:0 4px 12px rgba(0,0,0,0.25) !important;visibility:hidden;opacity:0;transition:opacity 0.2s,visibility 0.2s;pointer-events:none;width:max-content;" class="upc-tooltip-content">
+                <div style="position:fixed !important;background:#1F2937 !important;border-radius:6px !important;padding:12px 10px !important;font-size:11px !important;text-align:left !important;white-space:normal !important;z-index:99999 !important;box-shadow:0 4px 12px rgba(0,0,0,0.25) !important;visibility:hidden;opacity:0;transition:opacity 0.2s,visibility 0.2s;pointer-events:none;width:max-content;" class="upc-tooltip-content">
                     <div style="font-size:10px;font-weight:600;color:#9CA3AF;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;">Old UPCs</div>
                     <div style="color:#F3F4F6;line-height:1.6;">${restUpcs}</div>
                 </div>

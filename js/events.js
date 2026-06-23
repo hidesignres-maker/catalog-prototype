@@ -761,8 +761,10 @@ const EventHandler = {
             setTimeout(() => drawerOverlay?.classList.remove('active'), 300);
         };
 
-        // Get all changes from record
-        const changes = [];
+        // Categorize changes
+        const upcChanges = [];
+        const otherChanges = [];
+
         const fieldLabels = {
             brand: 'Brand',
             description: 'Description',
@@ -778,53 +780,54 @@ const EventHandler = {
             tradeMargin: 'Trade Margin'
         };
 
+        const upcFields = ['upc', 'tradeUpc', 'caseGtin'];
+
         Object.entries(fieldLabels).forEach(([key, label]) => {
             if (record[key] && record[key].to !== null) {
                 const fromValue = record[key].fromList ? record[key].fromList[0] : record[key].from;
-                changes.push({
+                const change = {
                     field: label,
                     from: fromValue,
                     to: record[key].to,
                     date: record.changeDate || '06/01/26'
-                });
+                };
+
+                if (upcFields.includes(key)) {
+                    upcChanges.push(change);
+                } else {
+                    otherChanges.push(change);
+                }
             }
         });
 
-        // Group changes by date
-        const changesByDate = {};
-        changes.forEach(change => {
-            if (!changesByDate[change.date]) changesByDate[change.date] = [];
-            changesByDate[change.date].push(change);
-        });
+        const allChanges = [...upcChanges, ...otherChanges];
 
-        // Sort dates descending
-        const sortedDates = Object.keys(changesByDate).sort((a, b) => {
-            const dateA = new Date(a.split('/').reverse().join('-'));
-            const dateB = new Date(b.split('/').reverse().join('-'));
-            return dateB - dateA;
-        });
-
-        // Build expandable rows
-        const changeRowsHtml = sortedDates.map((date, idx) => `
-            <div class="audit-date-row" style="margin-bottom:12px;border:1px solid #E5E7EB;border-radius:6px;overflow:hidden;">
-                <div class="audit-date-header" style="display:flex;align-items:center;cursor:pointer;padding:12px;background:#F9FAFB;user-select:none;" data-date-idx="${idx}">
-                    <svg class="audit-date-chevron" style="width:16px;height:16px;color:#6B7280;transition:transform 0.2s;transform:rotate(0deg);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                    <span style="font-weight:600;color:#111827;margin-left:8px;">${escapeHtml(date)}</span>
-                    <span style="font-size:12px;color:#6B7280;margin-left:8px;">${changesByDate[date].length} change${changesByDate[date].length > 1 ? 's' : ''}</span>
-                </div>
-                <div class="audit-date-details" style="display:none;padding:12px;background:#fff;">
-                    ${changesByDate[date].map(change => `
-                        <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #F3F4F6;">
-                            <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">${escapeHtml(change.field)}</div>
-                            <div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(change.to)}</div>
-                            <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(change.from)}</div>
-                        </div>
-                    `).join('')}
-                </div>
+        // Build display sections
+        const upcChangeHtml = upcChanges.length > 0 ? `
+            <div style="margin-bottom:20px;">
+                <div style="font-size:11px;font-weight:700;color:#EF4444;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;">📌 UPC Changes (${upcChanges.length})</div>
+                ${upcChanges.map(change => `
+                    <div style="margin-bottom:12px;padding:12px;background:#FEF2F2;border-left:3px solid #EF4444;border-radius:4px;">
+                        <div style="font-size:12px;font-weight:600;color:#991B1B;margin-bottom:4px;">${escapeHtml(change.field)}</div>
+                        <div style="font-size:13px;font-weight:600;color:#374151;line-height:1.4;font-family:monospace;">${escapeHtml(change.to)}</div>
+                        <div style="font-size:11px;color:#9CA3AF;line-height:1.4;margin-top:2px;">↳ Previous: <span style="font-family:monospace;">${escapeHtml(change.from)}</span></div>
+                    </div>
+                `).join('')}
             </div>
-        `).join('');
+        ` : '';
+
+        const otherChangeHtml = otherChanges.length > 0 ? `
+            <div>
+                <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;">Other Changes (${otherChanges.length})</div>
+                ${otherChanges.map(change => `
+                    <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #F3F4F6;">
+                        <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">${escapeHtml(change.field)}</div>
+                        <div style="font-size:12px;font-weight:600;color:#374151;line-height:1.4;">${escapeHtml(change.to)}</div>
+                        <div style="font-size:11px;color:#9CA3AF;line-height:1.4;">↳ Previous: ${escapeHtml(change.from)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        ` : '';
 
         const descDisplay = record.description ? record.description.from.substring(0, 48) : record.id;
 
@@ -832,9 +835,9 @@ const EventHandler = {
             <div style="background:#fff;border-bottom:1px solid #E5E7EB;padding:20px 20px 16px;flex-shrink:0;">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
                     <div>
-                        <div style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Change History</div>
+                        <div style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">UPC History</div>
                         <div style="font-size:15px;font-weight:700;color:#111827;line-height:1.3;">${escapeHtml(descDisplay)}</div>
-                        <div style="font-size:12px;color:#6B7280;margin-top:6px;">${escapeHtml(record.vendor)} · ${escapeHtml(record.customer)}</div>
+                        <div style="font-size:12px;color:#6B7280;margin-top:6px;">${escapeHtml(record.changeDate || '06/01/26')} · ${escapeHtml(record.vendor)}</div>
                     </div>
                     <button id="closeAuditBtn" style="background:none;border:none;cursor:pointer;color:#6B7280;padding:2px;flex-shrink:0;display:flex;align-items:center;">
                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 13.5L13.5 4.5M4.5 4.5L13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -843,8 +846,11 @@ const EventHandler = {
             </div>
 
             <div style="flex:1;overflow-y:auto;padding:20px;background:#fff;">
-                <div style="font-size:12px;color:#6B7280;margin-bottom:16px;">Total ${changes.length} change${changes.length > 1 ? 's' : ''} across ${sortedDates.length} date${sortedDates.length > 1 ? 's' : ''}</div>
-                ${changeRowsHtml}
+                <div style="font-size:12px;color:#6B7280;margin-bottom:16px;padding:8px 12px;background:#F9FAFB;border-radius:4px;">
+                    Total <strong>${allChanges.length}</strong> change${allChanges.length > 1 ? 's' : ''} on ${escapeHtml(record.changeDate || '06/01/26')}
+                </div>
+                ${upcChangeHtml}
+                ${otherChangeHtml}
             </div>
 
             <div style="padding:14px 20px;border-top:1px solid #E5E7EB;display:flex;gap:8px;background:#fff;flex-shrink:0;">
@@ -854,19 +860,6 @@ const EventHandler = {
 
         drawer.querySelector('#closeAuditBtn').addEventListener('click', closeDrawer);
         drawer.querySelector('#closeAuditFooterBtn').addEventListener('click', closeDrawer);
-
-        // Add expand/collapse functionality
-        drawer.querySelectorAll('.audit-date-header').forEach(header => {
-            header.addEventListener('click', () => {
-                const idx = header.dataset.dateIdx;
-                const details = header.closest('.audit-date-row').querySelector('.audit-date-details');
-                const chevron = header.querySelector('.audit-date-chevron');
-                const isOpen = details.style.display !== 'none';
-
-                details.style.display = isOpen ? 'none' : 'block';
-                chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
-            });
-        });
 
         drawerOverlay?.classList.add('active');
         setTimeout(() => drawer?.classList.add('open'), 10);
