@@ -334,10 +334,10 @@ const UIManager = {
             const descFrom = rec.description ? rec.description.from : '—';
             const descTo   = rec.description && rec.description.to !== null ? rec.description.to : null;
 
-            const btnLabel = reviewed || 'Review';
-            const btnStyle = reviewed
-                ? 'padding:4px 12px;border:1px solid #D1D5DB;border-radius:6px;background:#F9FAFB;font-size:12px;font-weight:600;color:#6B7280;cursor:default;white-space:nowrap;'
-                : 'padding:4px 12px;border:1px solid #BFDBFE;border-radius:6px;background:#EFF6FF;font-size:12px;font-weight:600;color:#2563EB;cursor:pointer;white-space:nowrap;';
+            const actionLabel = reviewed || 'Review';
+            const actionStyle = reviewed
+                ? 'color:#6B7280;cursor:default;'
+                : 'color:#2185F4;cursor:pointer;font-weight:500;';
 
             return `<tr style="border-bottom:1px solid #F3F4F6;vertical-align:top;">
                 <td style="padding:10px 12px;white-space:nowrap;">
@@ -361,8 +361,8 @@ const UIManager = {
                 <td style="padding:10px 12px;">${this._ftCell(rec.priceArea)}</td>
                 <td style="padding:10px 12px;">${this._ftCell(rec.srp)}</td>
                 <td style="padding:10px 12px;">${this._ftCell(rec.sdv)}</td>
-                <td style="padding:10px 12px;">
-                    <button class="upc-review-btn" data-id="${escapeHtml(rec.id)}" style="${btnStyle}">${escapeHtml(btnLabel)}</button>
+                <td style="padding:10px 12px;white-space:nowrap;">
+                    <span class="upc-review-link" data-id="${escapeHtml(rec.id)}" style="${actionStyle}font-size:12px;white-space:nowrap;title="Review Change">${escapeHtml(actionLabel)}</span>
                 </td>
             </tr>`;
         }).join('');
@@ -394,9 +394,9 @@ const UIManager = {
         </div>`;
 
         section.onclick = (e) => {
-            const btn = e.target.closest('.upc-review-btn');
-            if (!btn) return;
-            const id  = btn.dataset.id;
+            const link = e.target.closest('.upc-review-link');
+            if (!link) return;
+            const id  = link.dataset.id;
             const rec = data.find(r => r.id === id);
             if (rec && typeof EventHandler !== 'undefined') EventHandler.openUpcChangeDrawer(rec);
         };
