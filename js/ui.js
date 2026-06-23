@@ -332,15 +332,8 @@ const UIManager = {
             return;
         }
 
-        const getSimpleStatus = (reviewStatus) => {
-            if (reviewStatus === 'Approved') return {label:'Ready', bg:'#F0FDF4', color:'#15803D', border:'#A7F3D0'};
-            if (reviewStatus === 'Needs Clarification') return {label:'Needs Review', bg:'#FEF2F2', color:'#B91C1C', border:'#FECACA'};
-            return {label:'UPC Changes', bg:'#EFF6FF', color:'#2563EB', border:'#BFDBFE'};
-        };
-
         const rowsHtml = data.map(rec => {
             const reviewed = rec._reviewStatus;
-            const statusCfg = getSimpleStatus(reviewed);
 
             const descFrom = rec.description ? rec.description.from : '—';
             const descTo   = rec.description && rec.description.to !== null ? rec.description.to : null;
@@ -354,9 +347,6 @@ const UIManager = {
             const lastUpdated = rec.lastUpdated || this._generateLastUpdated();
 
             return `<tr style="border-bottom:1px solid #F3F4F6;vertical-align:top;">
-                <td style="padding:10px 12px;white-space:nowrap;">
-                    <span style="background:${statusCfg.bg};color:${statusCfg.color};border:1px solid ${statusCfg.border};padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;">${statusCfg.label}</span>
-                </td>
                 <td style="padding:10px 12px;font-size:12px;color:#6B7280;">${escapeHtml(rec.vendor)} · ${escapeHtml(rec.bu)}</td>
                 <td style="padding:10px 12px;min-width:120px;">${this._ftCell(rec.brand)}</td>
                 <td style="padding:10px 12px;min-width:180px;">
@@ -389,7 +379,6 @@ const UIManager = {
                 <table style="width:100%;border-collapse:collapse;min-width:1800px;">
                     <thead>
                         <tr style="background:#F9FAFB;border-bottom:2px solid #E5E7EB;">
-                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Status</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Product</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;min-width:120px;">Brand</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;min-width:180px;">Description Change</th>
