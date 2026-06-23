@@ -236,6 +236,17 @@ const UIManager = {
 
     // ── UPC Change Matrix ──────────────────────────────────────────────────────
 
+    _generateLastUpdated() {
+        const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+        const month = months[Math.floor(Math.random() * months.length)];
+        const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+        const year = '26';
+        const hour = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+        const minute = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+        const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+        return `${month}/${day}/${year} ${hour}:${minute}${ampm}`;
+    },
+
     _ftCell(field) {
         if (!field) return '<span style="color:#D1D5DB;font-size:12px;">—</span>';
 
@@ -339,6 +350,9 @@ const UIManager = {
                 ? 'color:#6B7280;cursor:default;'
                 : 'color:#2185F4;cursor:pointer;font-weight:500;';
 
+            // Generate last updated timestamp if not present
+            const lastUpdated = rec.lastUpdated || this._generateLastUpdated();
+
             return `<tr style="border-bottom:1px solid #F3F4F6;vertical-align:top;">
                 <td style="padding:10px 12px;white-space:nowrap;">
                     <span style="background:${statusCfg.bg};color:${statusCfg.color};border:1px solid ${statusCfg.border};padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;">${statusCfg.label}</span>
@@ -362,7 +376,10 @@ const UIManager = {
                 <td style="padding:10px 12px;">${this._ftCell(rec.srp)}</td>
                 <td style="padding:10px 12px;">${this._ftCell(rec.sdv)}</td>
                 <td style="padding:10px 12px;white-space:nowrap;">
-                    <span class="upc-review-link" data-id="${escapeHtml(rec.id)}" style="${actionStyle}font-size:12px;white-space:nowrap;title="Review Change">${escapeHtml(actionLabel)}</span>
+                    <span class="audit-trail-link" data-id="${escapeHtml(rec.id)}" style="color:#2185F4;font-weight:500;cursor:pointer;font-size:12px;white-space:nowrap;" title="View Audit Trail">${escapeHtml(lastUpdated)}</span>
+                </td>
+                <td style="padding:10px 12px;white-space:nowrap;">
+                    <span class="upc-review-link" data-id="${escapeHtml(rec.id)}" style="${actionStyle}font-size:12px;white-space:nowrap;" title="Review Change">${escapeHtml(actionLabel)}</span>
                 </td>
             </tr>`;
         }).join('');
@@ -385,6 +402,7 @@ const UIManager = {
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Price Area</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">SRP</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">SDV</th>
+                            <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Last Updated</th>
                             <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;white-space:nowrap;">Action</th>
                         </tr>
                     </thead>
@@ -394,11 +412,21 @@ const UIManager = {
         </div>`;
 
         section.onclick = (e) => {
-            const link = e.target.closest('.upc-review-link');
-            if (!link) return;
-            const id  = link.dataset.id;
-            const rec = data.find(r => r.id === id);
-            if (rec && typeof EventHandler !== 'undefined') EventHandler.openUpcChangeDrawer(rec);
+            const reviewLink = e.target.closest('.upc-review-link');
+            if (reviewLink) {
+                const id  = reviewLink.dataset.id;
+                const rec = data.find(r => r.id === id);
+                if (rec && typeof EventHandler !== 'undefined') EventHandler.openUpcChangeDrawer(rec);
+                return;
+            }
+
+            const auditLink = e.target.closest('.audit-trail-link');
+            if (auditLink) {
+                const id  = auditLink.dataset.id;
+                const rec = data.find(r => r.id === id);
+                if (rec && typeof EventHandler !== 'undefined') EventHandler.openAuditTrailDrawer(rec);
+                return;
+            }
         };
 
         if (window.lucide) try { lucide.createIcons(); } catch(e) {}
